@@ -1,34 +1,278 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Portafolio de Redes</title>
-  <link rel="stylesheet" href="css/estilos.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anderson Her - Portafolio de Redes</title>
+    <link rel="stylesheet" href="css/estilos.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-  <header>
-    <h1>Portafolio de Redes</h1>
-    <p>Laboratorios CCNA/CCNP, topologías, RSTP, EtherChannel, OSPF, MPLS…</p>
-  </header>
+    <!-- Header / Menú de navegación -->
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>Anderson Her – Portafolio de Redes</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#inicio">Inicio</a></li>
+                    <li><a href="#laboratorios">Laboratorios</a></li>
+                    <li><a href="#topologias">Topologías</a></li>
+                    <li><a href="#habilidades">Habilidades</a></li>
+                    <li><a href="#contacto">Contacto</a></li>
+                </ul>
+            </nav>
+            <div class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
 
-  <main>
-    <section>
-      <h2>Topologías</h2>
-      <img src="img/topologia1.png" alt="Topología RSTP">
+    <!-- Sección Inicio -->
+    <section id="inicio" class="inicio">
+        <div class="container">
+            <div class="presentacion">
+                <div class="texto-presentacion">
+                    <h2>Hola, soy Anderson Her</h2>
+                    <p>Soy especialista en redes y comunicaciones con experiencia en diseño, implementación y solución de problemas en infraestructuras de red. Actualmente me dedico a profundizar mis conocimientos en protocolos avanzados de networking y seguridad perimetral.</p>
+                    <p>Mis habilidades incluyen configuración de dispositivos de red, implementación de protocolos de enrutamiento, diseño de topologías escalables y automatización de procesos de red.</p>
+                </div>
+                <div class="foto-perfil">
+                    <img src="img/perfil.jpg" alt="Anderson Her">
+                </div>
+            </div>
+        </div>
     </section>
-    <section>
-      <h2>Laboratorios</h2>
-      <ul>
-        <li>RSTP con puertos en forwarding/blocking</li>
-        <li>EtherChannel LACP</li>
-        <li>Router-on-a-Stick</li>
-      </ul>
-    </section>
-  </main>
 
-  <footer>
-    <small>© 2025 Tu Nombre</small>
-  </footer>
+    <!-- Sección Laboratorios -->
+    <section id="laboratorios" class="laboratorios">
+        <div class="container">
+            <h2>Laboratorios</h2>
+            <div class="categorias-labs">
+                <div class="categoria" onclick="toggleCategoria('ccna')">
+                    <h3>CCNA Avanzado <i class="fas fa-chevron-down"></i></h3>
+                    <div id="ccna" class="contenido-categoria">
+                        <div class="tarjeta-lab">
+                            <div class="lab-imagen">
+                                <img src="img/ccnna/lab1.png" alt="Laboratorio CCNA 1">
+                            </div>
+                            <div class="lab-info">
+                                <h4>Configuración de VLANs</h4>
+                                <p><strong>Objetivo:</strong> Implementar y verificar una red con múltiples VLANs.</p>
+                                <p><strong>Conceptos:</strong> VLANs, Trunking, VTP, Inter-VLAN routing.</p>
+                            </div>
+                        </div>
+                        <div class="tarjeta-lab">
+                            <div class="lab-imagen">
+                                <img src="img/ccnna/lab2.png" alt="Laboratorio CCNA 2">
+                            </div>
+                            <div class="lab-info">
+                                <h4>OSPF en Área Única</h4>
+                                <p><strong>Objetivo:</strong> Configurar el protocolo OSPF en un entorno de múltiples routers.</p>
+                                <p><strong>Conceptos:</strong> OSPF, DR/BDR, Cost, Redistribución.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="categoria" onclick="toggleCategoria('ccnp')">
+                    <h3>CCNP <i class="fas fa-chevron-down"></i></h3>
+                    <div id="ccnp" class="contenido-categoria">
+                        <div class="tarjeta-lab">
+                            <div class="lab-imagen">
+                                <img src="img/ccnp/lab1.png" alt="Laboratorio CCNP 1">
+                            </div>
+                            <div class="lab-info">
+                                <h4>Implementación de MPLS</h4>
+                                <p><strong>Objetivo:</strong> Configurar una red MPLS con LDP y VPNs.</p>
+                                <p><strong>Conceptos:</strong> MPLS, LDP, MP-BGP, VRF.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="categoria" onclick="toggleCategoria('automatizacion')">
+                    <h3>Automatización de Redes <i class="fas fa-chevron-down"></i></h3>
+                    <div id="automatizacion" class="contenido-categoria">
+                        <div class="tarjeta-lab">
+                            <div class="lab-imagen">
+                                <img src="img/automatizacion/lab1.png" alt="Laboratorio Automatización 1">
+                            </div>
+                            <div class="lab-info">
+                                <h4>Script de Backup con Python</h4>
+                                <p><strong>Objetivo:</strong> Crear un script para realizar backup automático de configuraciones.</p>
+                                <p><strong>Conceptos:</strong> Python, Paramiko, Configuración de dispositivos.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="categoria" onclick="toggleCategoria('seguridad')">
+                    <h3>Seguridad Perimetral <i class="fas fa-chevron-down"></i></h3>
+                    <div id="seguridad" class="contenido-categoria">
+                        <div class="tarjeta-lab">
+                            <div class="lab-imagen">
+                                <img src="img/seguridad/lab1.png" alt="Laboratorio Seguridad 1">
+                            </div>
+                            <div class="lab-info">
+                                <h4>Configuración de Firewall</h4>
+                                <p><strong>Objetivo:</strong> Implementar políticas de seguridad en firewall.</p>
+                                <p><strong>Conceptos:</strong> ACLs, NAT, Políticas de seguridad, VPN.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Topologías -->
+    <section id="topologias" class="topologias">
+        <div class="container">
+            <h2>Topologías</h2>
+            <div class="galeria-topologias">
+                <div class="item-topologia" onclick="abrirModal('img/ccnna/lab1.png')">
+                    <img src="img/ccnna/lab1.png" alt="Topología 1">
+                    <div class="overlay">Ver más</div>
+                </div>
+                <div class="item-topologia" onclick="abrirModal('img/ccnna/lab2.png')">
+                    <img src="img/ccnna/lab2.png" alt="Topología 2">
+                    <div class="overlay">Ver más</div>
+                </div>
+                <div class="item-topologia" onclick="abrirModal('img/ccnp/lab1.png')">
+                    <img src="img/ccnp/lab1.png" alt="Topología 3">
+                    <div class="overlay">Ver más</div>
+                </div>
+                <div class="item-topologia" onclick="abrirModal('img/automatizacion/lab1.png')">
+                    <img src="img/automatizacion/lab1.png" alt="Topología 4">
+                    <div class="overlay">Ver más</div>
+                </div>
+                <div class="item-topologia" onclick="abrirModal('img/seguridad/lab1.png')">
+                    <img src="img/seguridad/lab1.png" alt="Topología 5">
+                    <div class="overlay">Ver más</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal para imágenes -->
+    <div id="modal" class="modal">
+        <span class="cerrar" onclick="cerrarModal()">&times;</span>
+        <img class="modal-contenido" id="img-modal">
+    </div>
+
+    <!-- Sección Habilidades -->
+    <section id="habilidades" class="habilidades">
+        <div class="container">
+            <h2>Habilidades y Tecnologías</h2>
+            <div class="categorias-habilidades">
+                <div class="categoria-habilidad">
+                    <h3>CCNA</h3>
+                    <div class="habilidades-list">
+                        <div class="habilidad-item">
+                            <i class="fas fa-network-wired"></i>
+                            <span>VLAN</span>
+                        </div>
+                        <div class="habilidad-item">
+                            <i class="fas fa-sitemap"></i>
+                            <span>RSTP</span>
+                        </div>
+                        <div class="habilidad-item">
+                            <i class="fas fa-link"></i>
+                            <span>EtherChannel</span>
+                        </div>
+                        <div class="habilidad-item">
+                            <i class="fas fa-route"></i>
+                            <span>OSPF</span>
+                        </div>
+                        <div class="habilidad-item">
+                            <i class="fas fa-server"></i>
+                            <span>DHCP</span>
+                        </div>
+                        <div class="habilidad-item">
+                            <i class="fas fa-exchange-alt"></i>
+                            <span>NAT</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="categoria-habilidad">
+                    <h3>CCNP</h3>
+                    <div class="habilidades-list">
+                        <div class="habilidad-item">
+                            <i class="fas fa-project-diagram"></i>
+                            <span>MPLS</span>
+                        </div>
+                        <div class="habilidad-item">
+                            <i class="fas fa-globe"></i>
+                            <span>BGP</span>
+                        </div>
+                        <div class="habilidad-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Seguridad de Red</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="categoria-habilidad">
+                    <h3>Automatización</h3>
+                    <div class="habilidades-list">
+                        <div class="habilidad-item">
+                            <i class="fab fa-python"></i>
+                            <span>Python</span>
+                        </div>
+                        <div class="habilidad-item">
+                            <i class="fas fa-cogs"></i>
+                            <span>Ansible</span>
+                        </div>
+                        <div class="habilidad-item">
+                            <i class="fas fa-code"></i>
+                            <span>Scripts</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="categoria-habilidad">
+                    <h3>Seguridad</h3>
+                    <div class="habilidades-list">
+                        <div class="habilidad-item">
+                            <i class="fas fa-fire"></i>
+                            <span>Firewalls</span>
+                        </div>
+                        <div class="habilidad-item">
+                            <i class="fas fa-lock"></i>
+                            <span>VPN</span>
+                        </div>
+                        <div class="habilidad-item">
+                            <i class="fas fa-filter"></i>
+                            <span>ACL</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer / Contacto -->
+    <footer id="contacto">
+        <div class="container">
+            <div class="contacto-info">
+                <h3>Contacto</h3>
+                <p>Si quieres ver más laboratorios, contáctame.</p>
+                <div class="contacto-enlaces">
+                    <a href="mailto:anderson@example.com"><i class="fas fa-envelope"></i> anderson@example.com</a>
+                    <a href="https://www.linkedin.com" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a>
+                    <a href="https://www.github.com" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 Anderson Her - Portafolio de Redes. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
 </body>
 </html>
