@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio CCNA Avanzado: OSPF, NAT e Inter-VLAN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background-color: #0066a0;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        h2 {
+            font-size: 24px;
+            margin: 25px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #0066a0;
+            color: #0066a0;
+        }
+        
+        h3 {
+            font-size: 20px;
+            margin: 20px 0 10px;
+            color: #0066a0;
+        }
+        
+        section {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .objective {
+            background-color: #e8f4fc;
+            border-left: 5px solid #0066a0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #0066a0;
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        
+        .command {
+            color: #ffcc66;
+        }
+        
+        .comment {
+            color: #999;
+            font-style: italic;
+        }
+        
+        .config-section {
+            margin-bottom: 25px;
+        }
+        
+        .note {
+            background-color: #fff9e6;
+            border-left: 5px solid #ffcc00;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .topology-image {
+            text-align: center;
+            margin: 25px 0;
+        }
+        
+        .topology-image img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .caption {
+            font-style: italic;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            h2 {
+                font-size: 20px;
+            }
+            
+            section {
+                padding: 15px;
+            }
+            
+            pre {
+                font-size: 12px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Laboratorio: Red Empresarial con OSPF, NAT Overload, Inter-VLAN Routing y ACL</h1>
+        <p>Documentación completa del laboratorio CCNA Avanzado</p>
+    </header>
+
+    <section class="objective">
+        <h2>1) Objetivo</h2>
+        <p>Diseñar y configurar una red empresarial que integre:</p>
+        <ul>
+            <li>OSPF (process 1, área 0) para enrutamiento dinámico entre routers ISR4331.</li>
+            <li>NAT Overload (PAT) en el Router6 para dar salida a Internet (ISP).</li>
+            <li>Inter-VLAN Routing con SVIs en Switch Admin para las VLANs (10, 20, 30, 40).</li>
+            <li>ACL estándar en Router3 para restringir el acceso hacia la red de servidores.</li>
+            <li>Segmentación de red con VLANs 10, 20, 30 y 40 en el Cluster0.</li>
+            <li>Implementación de un servidor central (192.168.9.0/24) con servicios de red básicos.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>2) Topología y Roles</h2>
+        <ul>
+            <li><strong>Cluster0:</strong> Switch Admin con 4 VLANs (10, 20, 30, 40).</li>
+            <li><strong>Router0 – Router6:</strong> Interconexión OSPF área 0.</li>
+            <li><strong>Router6:</strong> Configurado con NAT Overload para salida a Internet (red pública 200.1.1.0/30).</li>
+            <li><strong>Router3:</strong> Filtrado de tráfico con ACL estándar, permitiendo únicamente VLANs 10, 20 y 40.</li>
+            <li><strong>Servidor:</strong> 192.168.9.0/24 conectado al Router3.</li>
+            <li><strong>ISP:</strong> Simulación de Internet.</li>
+        </ul>
+        
+        <div class="topology-image">
+            <!-- Espacio para imagen de topología (imagen real no disponible) -->
+            <div style="background-color: #eee; padding: 40px; text-align: center; border-radius: 5px;">
+                [Imagen de topología OSPF con VLANs]
+            </div>
+            <p class="caption">Figura 1: Topología de red empresarial con OSPF, VLANs y NAT</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>3) Tabla de VLANs y Subredes</h2>
+        <table>
+            <tr>
+                <th>Segmento</th>
+                <th>Red / CIDR</th>
+                <th>Máscara</th>
+                <th>Gateway</th>
+                <th>Propósito</th>
+            </tr>
+            <tr>
+                <td>VLAN10</td>
+                <td>192.168.1.0/24</td>
+                <td>255.255.255.0</td>
+                <td>192.168.1.1</td>
+                <td>Usuarios</td>
+            </tr>
+            <tr>
+                <td>VLAN20</td>
+                <td>192.168.2.0/24</td>
+                <td>255.255.255.0</td>
+                <td>192.168.2.1</td>
+                <td>Administración</td>
+            </tr>
+            <tr>
+                <td>VLAN30</td>
+                <td>192.168.3.0/24</td>
+                <td>255.255.255.0</td>
+                <td>192.168.3.1</td>
+                <td>(Uso personalizado)</td>
+            </tr>
+            <tr>
+                <td>VLAN40</td>
+                <td>192.168.4.0/24</td>
+                <td>255.255.255.0</td>
+                <td>192.168.4.1</td>
+                <td>Gestión</td>
+            </tr>
+            <tr>
+                <td>Servidores</td>
+                <td>192.168.9.0/24</td>
+                <td>255.255.255.0</td>
+                <td>192.168.9.1</td>
+                <td>Servidores centrales</td>
+            </tr>
+        </table>
+        
+        <h3>Enlaces entre Routers</h3>
+        <table>
+            <tr>
+                <th>Enlace</th>
+                <th>Red / CIDR</th>
+                <th>Máscara</th>
+                <th>Direcciones utilizables</th>
+            </tr>
+            <tr>
+                <td>R0 ↔ R1</td>
+                <td>10.0.0.0/30</td>
+                <td>255.255.255.252</td>
+                <td>10.0.0.1 - 10.0.0.2</td>
+            </tr>
+            <tr>
+                <td>R1 ↔ R4</td>
+                <td>10.1.0.0/30</td>
+                <td>255.255.255.252</td>
+                <td>10.1.0.1 - 10.1.0.2</td>
+            </tr>
+            <tr>
+                <td>R4 ↔ R3</td>
+                <td>10.2.0.0/30</td>
+                <td>255.255.255.252</td>
+                <td>10.2.0.1 - 10.2.0.2</td>
+            </tr>
+            <tr>
+                <td>R2 ↔ R3</td>
+                <td>10.3.0.0/30</td>
+                <td>255.255.255.252</td>
+                <td>10.3.0.1 - 10.3.0.2</td>
+            </tr>
+            <tr>
+                <td>R0 ↔ R2</td>
+                <td>10.4.0.0/30</td>
+                <td>255.255.255.252</td>
+                <td>10.4.0.1 - 10.4.0.2</td>
+            </tr>
+            <tr>
+                <td>R1 ↔ R6</td>
+                <td>10.90.0.0/30</td>
+                <td>255.255.255.252</td>
+                <td>10.90.0.1 - 10.90.0.2</td>
+            </tr>
+            <tr>
+                <td>R6 ↔ ISP</td>
+                <td>200.1.1.0/30</td>
+                <td>255.255.255.252</td>
+                <td>200.1.1.1 - 200.1.1.2</td>
+            </tr>
+        </table>
+    </section>
+
+    <section>
+        <h2>4) Configuración</h2>
+        
+        <div class="config-section">
+            <h3>4.1 Inter-VLAN Routing (Switch Admin - Cluster0)</h3>
+            <pre><code><span class="command">ip routing</span>
+<span class="command">vlan 10</span>
+<span class="command">vlan 20</span>
+<span class="command">vlan 30</span>
+<span class="command">vlan 40</span>
+<span class="comment">!</span>
+<span class="command">interface vlan 10</span>
+<span class="command">ip address 192.168.1.1 255.255.255.0</span>
+<span class="command">interface vlan 20</span>
+<span class="command">ip address 192.168.2.1 255.255.255.0</span>
+<span class="command">interface vlan 30</span>
+<span class="command">ip address 192.168.3.1 255.255.255.0</span>
+<span class="command">interface vlan 40</span>
+<span class="command">ip address 192.168.4.1 255.255.255.0</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>4.2 OSPF (en todos los routers ISR4331)</h3>
+            <pre><code><span class="command">router ospf 1</span>
+<span class="command">router-id 1.1.1.1</span> <span class="comment">! cambia en cada router</span>
+<span class="command">network 10.0.0.0 0.0.0.3 area 0</span>
+<span class="command">network 10.1.0.0 0.0.0.3 area 0</span>
+<span class="command">network 10.2.0.0 0.0.0.3 area 0</span>
+<span class="command">network 10.3.0.0 0.0.0.3 area 0</span>
+<span class="command">network 10.4.0.0 0.0.0.3 area 0</span>
+<span class="command">network 10.90.0.0 0.0.0.3 area 0</span>
+<span class="command">network 192.168.1.0 0.0.0.255 area 0</span>
+<span class="command">network 192.168.2.0 0.0.0.255 area 0</span>
+<span class="command">network 192.168.3.0 0.0.0.255 area 0</span>
+<span class="command">network 192.168.4.0 0.0.0.255 area 0</span>
+<span class="command">network 192.168.9.0 0.0.0.255 area 0</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>4.3 NAT Overload (Router6)</h3>
+            <pre><code><span class="command">interface serial 0/1/0</span>
+<span class="command">ip address 200.1.1.2 255.255.255.252</span>
+<span class="command">ip nat outside</span>
+<span class="command">interface serial 1/1/0</span>
+<span class="command">ip address 10.90.0.2 255.255.255.252</span>
+<span class="command">ip nat inside</span>
+<span class="command">ip nat inside source list 1 interface serial 0/1/0 overload</span>
+<span class="command">access-list 1 permit 192.168.0.0 0.0.255.255</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>4.4 ACL Estándar en Router3</h3>
+            <pre><code><span class="command">access-list 10 permit 192.168.1.0 0.0.0.255</span>
+<span class="command">access-list 10 permit 192.168.2.0 0.0.0.255</span>
+<span class="command">access-list 10 permit 192.168.4.0 0.0.0.255</span>
+<span class="command">access-list 10 deny any</span>
+<span class="comment">!</span>
+<span class="command">interface g0/0/0</span> <span class="comment">! interfaz conectada a servidores</span>
+<span class="command">ip access-group 10 out</span></code></pre>
+            <p class="note">Nota: Solo VLANs 10, 20 y 40 pueden llegar a la red 192.168.9.0 (servidores). VLAN30 (192.168.3.0/24) queda bloqueada.</p>
+        </div>
+
+        <div class="config-section">
+            <h3>4.5 SSH/VTY (en Router3)</h3>
+            <pre><code><span class="command">hostname R3</span>
+<span class="command">ip domain-name lab.local</span>
+<span class="command">crypto key generate rsa modulus 2048</span>
+<span class="command">username admin secret ClaveSegura123</span>
+<span class="command">ip ssh version 2</span>
+<span class="command">line vty 0 4</span>
+<span class="command">transport input ssh</span>
+<span class="command">login local</span></code></pre>
+        </div>
+    </section>
+
+    <section>
+        <h2>5) Pruebas y Validación</h2>
+        
+        <div class="config-section">
+            <h3>5.1 Verificación OSPF</h3>
+            <pre><code>Router#<span class="command">show ip ospf neighbor</span>
+<span class="comment">! Todos los routers deben ser adyacentes</span>
+
+Neighbor ID    Pri   State       Dead Time   Address         Interface
+10.90.0.1       0   FULL/--     00:00:37    10.1.0.1        Serial0/1/0
+192.168.9.1     0   FULL/--     00:00:38    10.2.0.2        Serial0/2/1
+
+Router#<span class="command">show ip route ospf</span>
+<span class="comment">! Rutas aprendidas via OSPF</span>
+
+10.0.0.0/8 is variably subnetted, 8 subnets, 2 masks
+O       10.1.0.0 [110/128] via 10.0.0.2, 00:03:33, Serial0/1/0
+O       10.2.0.0 [110/192] via 10.0.0.2, 00:03:33, Serial0/1/0
+O       10.4.0.0 [110/112] via 10.4.0.2, 00:03:23, Serial0/1/1
+O       10.3.0.0 [110/128] via 10.4.0.2, 00:03:33, Serial0/1/1
+O       10.90.0.0 [110/128] via 10.0.0.2, 00:03:33, Serial0/1/0
+O       192.168.1.0 [110/2] via 172.16.1.1, 00:03:03, GigabitEthernet0/0/0
+O       192.168.2.0 [110/2] via 172.16.1.1, 00:03:03, GigabitEthernet0/0/0
+O       192.168.3.0 [110/2] via 172.16.1.1, 00:03:03, GigabitEthernet0/0/0
+O       192.168.9.0 [110/129] via 10.4.0.2, 00:03:23, Serial0/1/1</code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>5.2 Verificación NAT</h3>
+            <pre><code>Router#<span class="command">show ip nat translations</span>
+
+Pro  Inside global     Inside local       Outside local      Outside global
+icmp 200.1.1.1:1024    192.168.2.2:1      200.1.1.2:1        200.1.1.2:1024
+icmp 200.1.1.1:1025    192.168.2.2:2      200.1.1.2:2        200.1.1.2:1025
+icmp 200.1.1.1:1       192.168.1.2:1      200.1.1.2:1        200.1.1.2:1
+icmp 200.1.1.1:2       192.168.1.2:2      200.1.1.2:2        200.1.1.2:2</code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>5.3 Verificación ACL</h3>
+            <pre><code>Router#<span class="command">show access-lists</span>
+Standard IP access list 10
+    10 permit 192.168.1.0, wildcard bits 0.0.0.255
+    20 permit 192.168.2.0, wildcard bits 0.0.0.255
+    30 permit 192.168.4.0, wildcard bits 0.0.0.255
+    40 deny any</code></pre>
+            <p class="note">Nota: Host en VLAN10 → ping al servidor 192.168.9.x → permitido. Host en VLAN30 → ping al servidor 192.168.9.x → denegado.</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>Documentación de Laboratorio CCNA Avanzado - Red Empresarial con OSPF, NAT e Inter-VLAN</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio CCNA Avanzado – Mega Data-Center</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background-color: #0066a0;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 24px;
+            margin: 25px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #0066a0;
+            color: #0066a0;
+        }
+
+        h3 {
+            font-size: 20px;
+            margin: 20px 0 10px;
+            color: #0066a0;
+        }
+
+        section {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .objective {
+            background-color: #e8f4fc;
+            border-left: 5px solid #0066a0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #0066a0;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+
+        .command {
+            color: #ffcc66;
+        }
+
+        .comment {
+            color: #999;
+            font-style: italic;
+        }
+
+        .config-section {
+            margin-bottom: 25px;
+        }
+
+        .note {
+            background-color: #fff9e6;
+            border-left: 5px solid #ffcc00;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .topology-image {
+            text-align: center;
+            margin: 25px 0;
+        }
+
+        .topology-image img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .caption {
+            font-style: italic;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+
+            section {
+                padding: 15px;
+            }
+
+            pre {
+                font-size: 12px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Laboratorio CCNA Avanzado – Mega Data-Center</h1>
+        <p>Documentación completa del laboratorio con EtherChannel, VTP, RSTP, Seguridad L2/L3, VPN y AAA</p>
+    </header>
+
+    <section class="objective">
+        <h2>1) Objetivo</h2>
+        <ul>
+            <li>Implementar un data-center jerárquico con topología Core-Distribution-Access.</li>
+            <li>Segmentar red mediante VLANs (10-14) y troncales EtherChannel LACP.</li>
+            <li>Proteger capa 2: RSTP, DHCP Snooping, DAI, Port-Security.</li>
+            <li>Configurar servicios de infraestructura: DHCP, DNS, NTP, SYSLOG, AAA (TACACS+/RADIUS).</li>
+            <li>Establecer túnel VPN IPsec sitio-a-sitio entre ROUTERDATACENTER y RB.</li>
+            <li>Controlar tráfico inter-VLAN mediante ACLs extendidas.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>2) Topología y Equipamiento</h2>
+        <ul>
+            <li><strong>Core:</strong> 2× Multilayer 3560 (SWP1-SWP2)</li>
+            <li><strong>Distribution:</strong> 4× 3560 (SWD1-SWD4)</li>
+            <li><strong>Access:</strong> 8× 2960 (SWA-SWH)</li>
+            <li><strong>Servidores:</strong> DHCP/DNS/HTTP (192.168.140.10), SYSLOG (192.168.140.11), NTP (192.168.140.12), AAA (192.168.140.11)</li>
+            <li><strong>Routers:</strong> ROUTERDATACENTER (HQ) ↔ RB (Remote Branch) vía VPN</li>
+        </ul>
+        <div class="topology-image">
+            <div style="background-color:#eee;padding:40px;border-radius:5px">
+                [Diagrama no disponible – Incluir imagen real aquí]
+            </div>
+            <p class="caption">Figura 1 – Topología Mega Data-Center</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>3) Tabla de VLANs</h2>
+        <table>
+            <tr>
+                <th>VLAN</th><th>Nombre</th><th>Red / CIDR</th><th>Gateway</th><th>Servidor DHCP Relay</th>
+            </tr>
+            <tr><td>10</td><td>Contabilidad</td><td>192.168.10.0/24</td><td>192.168.10.1</td><td>192.168.140.10</td></tr>
+            <tr><td>11</td><td>Marketing</td><td>192.168.11.0/24</td><td>192.168.11.1</td><td>192.168.140.10</td></tr>
+            <tr><td>12</td><td>Ventas</td><td>192.168.12.0/24</td><td>192.168.12.1</td><td>192.168.140.10</td></tr>
+            <tr><td>13</td><td>Administración</td><td>192.168.13.0/24</td><td>192.168.13.1</td><td>192.168.140.10</td></tr>
+            <tr><td>14</td><td>Servidores</td><td>192.168.140.0/24</td><td>192.168.140.1</td><td>192.168.140.10</td></tr>
+        </table>
+    </section>
+
+    <section>
+        <h2>4) EtherChannel (LACP)</h2>
+        <table>
+            <tr><th>Po</th><th>Dispositivos</th><th>Puertos</th><th>Modo LACP</th><th>Observaciones</th></tr>
+            <tr><td>Po1</td><td>SWP1-SWP2</td><td>Gi0/1-2 ↔ Gi0/1-2</td><td>active/active</td><td>Uplink Core redundante</td></tr>
+            <tr><td>Po2</td><td>SWP1-SWD1</td><td>Fa0/1-2 ↔ Fa0/1-2</td><td>active/active</td><td>Distribution → Core</td></tr>
+            <tr><td>Po3</td><td>SWP1-SWD2</td><td>Fa0/3-4 ↔ Fa0/1-2</td><td>active/active</td><td>Respaldo inter-dist.</td></tr>
+            <tr><td>Po4</td><td>SWP2-SWD3</td><td>Fa0/1-2 ↔ Fa0/1-2</td><td>active/active</td><td>Distribution → Core</td></tr>
+            <tr><td>Po5</td><td>SWP2-SWD4</td><td>Fa0/3-4 ↔ Fa0/1-2</td><td>active/active</td><td>Distribution → Core</td></tr>
+        </table>
+    </section>
+
+    <section>
+        <h2>5) Configuración Detallada</h2>
+
+        <div class="config-section">
+            <h3>5.1 VTP – SWP1 (Servidor)</h3>
+            <pre><code><span class="command">vtp mode server</span>
+<span class="command">vtp domain Servero.hn</span>
+<span class="command">vtp password 12345</span>
+<span class="command">vlan 10</span>
+<span class="command">name contabilidad</span>
+<span class="command">vlan 11</span>
+<span class="command">name marketing</span>
+<span class="command">vlan 12</span>
+<span class="command">name ventas</span>
+<span class="command">vlan 13</span>
+<span class="command">name administración</span>
+<span class="command">vlan 14</span>
+<span class="command">name servidores</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>5.2 RSTP – Prioridades</h3>
+            <pre><code>! SWP1 – Root Primary
+<span class="command">spanning-tree mode rapid-pvst</span>
+<span class="command">spanning-tree vlan 1,10,11,12,13,14 priority 4096</span>
+
+! SWP2 – Root Secondary
+<span class="command">spanning-tree vlan 1,10,11,12,13,14 priority 8192</span>
+
+! Distribution
+<span class="command">spanning-tree vlan 1,10,11,12,13,14 priority 12288</span>
+
+! Access
+<span class="command">spanning-tree vlan 1,10,11,12,13,14 priority 61440</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>5.3 SVIs – Gateways</h3>
+            <pre><code><span class="command">ip routing</span>
+<span class="command">interface vlan 10</span>
+<span class="command"> ip address 192.168.10.1 255.255.255.0</span>
+<span class="command"> ip helper-address 192.168.140.10</span>
+<span class="command"> no shutdown</span>
+<span class="command">interface vlan 11</span>
+<span class="command"> ip address 192.168.11.1 255.255.255.0</span>
+<span class="command"> ip helper-address 192.168.140.10</span>
+<span class="command"> no shutdown</span>
+<span class="command">interface vlan 12</span>
+<span class="command"> ip address 192.168.12.1 255.255.255.0</span>
+<span class="command"> ip helper-address 192.168.140.10</span>
+<span class="command"> no shutdown</span>
+<span class="command">interface vlan 13</span>
+<span class="command"> ip address 192.168.13.1 255.255.255.0</span>
+<span class="command"> ip helper-address 192.168.140.10</span>
+<span class="command"> no shutdown</span>
+<span class="command">interface vlan 14</span>
+<span class="command"> ip address 192.168.140.1 255.255.255.0</span>
+<span class="command"> no shutdown</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>5.4 Seguridad L2 – DHCP Snooping & DAI</h3>
+            <pre><code><span class="command">ip dhcp snooping</span>
+<span class="command">ip dhcp snooping vlan 10,11,12,13,14</span>
+<span class="command">ip arp inspection vlan 10,11,12,13,14</span>
+<span class="command">interface range g0/1-2</span>
+<span class="command"> ip dhcp snooping trust</span>
+<span class="command"> ip arp inspection trust</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>5.5 Port Security – Puertos de Acceso</h3>
+            <pre><code><span class="command">interface range f0/1-24</span>
+<span class="command"> switchport mode access</span>
+<span class="command"> switchport port-security</span>
+<span class="command"> switchport port-security maximum 2</span>
+<span class="command"> switchport port-security violation restrict</span>
+<span class="command"> switchport port-security mac-address sticky</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>5.6 ACLs Extendidas – Control Inter-VLAN</h3>
+            <pre><code>! VLAN10 → Otras
+<span class="command">ip access-list extended VLAN10_TO_OTHERS</span>
+<span class="command"> permit icmp 192.168.10.0 0.0.0.255 any</span>
+<span class="command"> permit udp 192.168.10.0 0.0.0.255 any eq 53</span>
+<span class="command"> permit tcp 192.168.10.0 0.0.0.255 192.168.13.0 0.0.0.255 eq 445</span>
+<span class="command"> deny ip 192.168.10.0 0.0.0.255 192.168.11.0 0.0.0.255</span>
+<span class="command"> deny ip 192.168.10.0 0.0.0.255 192.168.12.0 0.0.0.255</span>
+<span class="command"> permit ip 192.168.10.0 0.0.0.255 any</span>
+! VLAN11,12,13,14 ... (igual lógica)</code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>5.7 AAA – TACACS+ / RADIUS / Fallback</h3>
+            <pre><code><span class="command">aaa new-model</span>
+<span class="command">tacacs-server host 192.168.140.11 key TacKey123</span>
+<span class="command">radius-server host 192.168.140.11 auth-port 1812 acct-port 1813 key RadKey123</span>
+<span class="command">aaa authentication login default group tacacs+ group radius local</span>
+<span class="command">aaa authentication enable default group tacacs+ group radius enable</span>
+<span class="command">aaa authorization exec default group tacacs+ local</span>
+<span class="command">aaa authorization commands 15 default group tacacs+ local</span>
+<span class="command">aaa accounting exec default start-stop group radius</span>
+<span class="command">aaa accounting commands 15 default start-stop group tacacs+</span>
+<span class="command">line vty 0 4</span>
+<span class="command"> login authentication default</span>
+<span class="command"> transport input ssh</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>5.8 NTP y SYSLOG</h3>
+            <pre><code><span class="command">ntp server 192.168.140.12</span>
+<span class="command">logging 192.168.140.11</span>
+<span class="command">logging trap informational</span>
+<span class="command">service timestamps log datetime msec</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>5.9 VPN IPsec – ROUTERDATACENTER ↔ RB</h3>
+            <pre><code>! ROUTERDATACENTER
+<span class="command">access-list 110 permit ip 192.168.140.0 0.0.0.255 192.168.120.0 0.0.0.255</span>
+<span class="command">access-list 110 permit ip 192.168.10.0 0.0.0.255 192.168.120.0 0.0.0.255</span>
+<span class="command">crypto isakmp policy 10</span>
+<span class="command"> encryption aes 256</span>
+<span class="command"> authentication pre-share</span>
+<span class="command"> group 5</span>
+<span class="command">crypto isakmp key vpnpa66 address 10.0.3.2</span>
+<span class="command">crypto ipsec transform-set VPN-SET esp-aes esp-sha-hmac</span>
+<span class="command">crypto map VPN-MAP 10 ipsec-isakmp</span>
+<span class="command"> set peer 10.0.3.2</span>
+<span class="command"> set transform-set VPN-SET</span>
+<span class="command"> match address 110</span>
+<span class="command">interface GigabitEthernet0/0/0</span>
+<span class="command"> crypto map VPN-MAP</span>
+
+! RB (config idéntica con peer 10.0.0.1)</code></pre>
+        </div>
+    </section>
+
+    <section>
+        <h2>6) Comandos de Validación</h2>
+        <pre><code><span class="command">show vlan brief</span>
+<span class="command">show vtp status</span>
+<span class="command">show spanning-tree summary</span>
+<span class="command">show etherchannel summary</span>
+<span class="command">show dhcp snooping</span>
+<span class="command">show access-lists</span>
+<span class="command">show crypto isakmp sa</span>
+<span class="command">show crypto ipsec sa</span></code></pre>
+    </section>
+
+    <footer>
+        <p>Documentación de Laboratorio CCNA Avanzado – Mega Data-Center (EtherChannel, VTP, RSTP, Seguridad, VPN y AAA)</p>
+    </footer>
+</body>
+</html>

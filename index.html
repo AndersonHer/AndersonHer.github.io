@@ -35,12 +35,12 @@
         <div class="container">
             <div class="presentacion">
                 <div class="texto-presentacion">
-                    <h2>Hola, soy Anderson Her</h2>
-                    <p>Soy especialista en redes y comunicaciones con experiencia en diseño, implementación y solución de problemas en infraestructuras de red. Actualmente me dedico a profundizar mis conocimientos en protocolos avanzados de networking y seguridad perimetral.</p>
+                    <h2>Hola, soy Anderson Hernandez</h2>
+                    <p>Soy Ingeniero en Infotecnologia y me especialiso en redes y comunicaciones con experiencia en diseño, implementación y solución de problemas en infraestructuras de red. Actualmente me dedico a profundizar mis conocimientos en protocolos avanzados de networking y seguridad perimetral.</p>
                     <p>Mis habilidades incluyen configuración de dispositivos de red, implementación de protocolos de enrutamiento, diseño de topologías escalables y automatización de procesos de red.</p>
                 </div>
                 <div class="foto-perfil">
-                    <img src="img/perfil.jpg" alt="Anderson Her">
+                    <img src="img/asd.png" alt="Anderson Her">
                 </div>
             </div>
         </div>
@@ -51,34 +51,79 @@
         <div class="container">
             <h2>Laboratorios</h2>
             <div class="categorias-labs">
+
+                <!-- CCNA Avanzado -->
                 <div class="categoria" onclick="toggleCategoria('ccna')">
                     <h3>CCNA Avanzado <i class="fas fa-chevron-down"></i></h3>
                     <div id="ccna" class="contenido-categoria">
-                        <div class="tarjeta-lab">
-                            <div class="lab-imagen">
-                                <img src="img/ccnna/lab1.png" alt="Laboratorio CCNA 1">
+
+                        <!-- Laboratorio 1 -->
+
+
+
+                        <a href="lab-mega.html" class="tarjeta-lab">
+                            <div class="lab-imagen" style="display:flex; gap:8px;">
+                                <img src="img/ccnalab1/image.png" alt="Vista Rack" style="width:50%;">
+                                <img src="img/ccnalab1/image2.jpg" alt="Diagrama Lógico" style="width:50%;">
                             </div>
                             <div class="lab-info">
-                                <h4>Configuración de VLANs</h4>
-                                <p><strong>Objetivo:</strong> Implementar y verificar una red con múltiples VLANs.</p>
-                                <p><strong>Conceptos:</strong> VLANs, Trunking, VTP, Inter-VLAN routing.</p>
+                                <h4>Mega Data-Center con EtherChannel, Seguridad L2/L3 y VPN</h4>
+                                <p><strong>Objetivo:</strong> Diseñar e implementar un data-center jerárquico con VLANs, EtherChannel LACP, RSTP, seguridad perimetral y túnel VPN IPsec.</p>
+                                <p><strong>Conceptos:</strong> VTP, RSTP, DHCP Snooping, DAI, ACLs, AAA, VPN IPsec, NTP, SYSLOG.</p>
                             </div>
-                        </div>
-                        <!-- En la sección de laboratorios, reemplaza las tarjetas con enlaces -->
+                        </a>
+
+
+
+                        
+
+                        <!-- Laboratorio 2 -->
+
+                        <a href="lab-Ospf.html" class="tarjeta-lab">
+                            <div class="lab-imagen">
+                                <img src="img/ccnalab2/b.png" alt="Laboratorio CCNA 1">
+                            </div>
+                            <div class="lab-info">
+                                <h4>Configuración de OSPF,NAT,ACL</h4>
+                                <p><strong>Objetivo:</strong> Red Empresarial con OSPF, NAT Overload, Inter-VLAN Routing y ACL.</p>
+                                <p><strong>Conceptos:</strong> Nat,OSPF,ACl,VLANs, Trunking, Inter-VLAN routing.</p>
+                            </div>
+                        </a>
+
+
+                       
+
+                        <!-- Laboratorio 3 -->
+                        
                         <a href="lab-vlan.html" class="tarjeta-lab">
                             <div class="lab-imagen">
-                                <img src="img/ccnalab2/a.jpg" alt="Laboratorio CCNA 1">
+                                <img src="img/ccnalab2/a.jpg" alt="Laboratorio CCNA 2">
                             </div>
                             <div class="lab-info">
                                 <h4>Configuración de Red jerárquica</h4>
                                 <p><strong>Objetivo:</strong> Implementar y verificar una red con múltiples VLANs.</p>
-                                <p><strong>Conceptos:</strong> VLANs, Trunking, VTP, Inter-VLAN routing,Dhcp nooping,SSH/VTY,Port Security.</p>
+                                <p><strong>Conceptos:</strong> VLANs, Trunking, VTP, Inter-VLAN routing, DHCP snooping, SSH/VTY, Port Security.</p>
                             </div>
                         </a>
-                        </div>
+
+
+                        
+                        <!-- Laboratorio 4 -->
+                        <a href="lab-vlan4.html" class="tarjeta-lab">
+                            <div class="lab-imagen">
+                                <img src="img/ccnna/lab4.png" alt="Laboratorio CCNA 4">
+                            </div>
+                            <div class="lab-info">
+                                <h4>Implementación de EtherChannel</h4>
+                                <p><strong>Objetivo:</strong> Configurar enlaces troncales agregados con EtherChannel.</p>
+                                <p><strong>Conceptos:</strong> PAgP, LACP, redundancia, balanceo de carga.</p>
+                            </div>
+                        </a>
+
                     </div>
                 </div>
-                
+
+                <!-- CCNP -->
                 <div class="categoria" onclick="toggleCategoria('ccnp')">
                     <h3>CCNP <i class="fas fa-chevron-down"></i></h3>
                     <div id="ccnp" class="contenido-categoria">
@@ -95,6 +140,7 @@
                     </div>
                 </div>
                 
+                <!-- Automatización -->
                 <div class="categoria" onclick="toggleCategoria('automatizacion')">
                     <h3>Automatización de Redes <i class="fas fa-chevron-down"></i></h3>
                     <div id="automatizacion" class="contenido-categoria">
@@ -111,6 +157,7 @@
                     </div>
                 </div>
                 
+                <!-- Seguridad -->
                 <div class="categoria" onclick="toggleCategoria('seguridad')">
                     <h3>Seguridad Perimetral <i class="fas fa-chevron-down"></i></h3>
                     <div id="seguridad" class="contenido-categoria">
@@ -126,6 +173,7 @@
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
     </section>
@@ -135,20 +183,20 @@
         <div class="container">
             <h2>Topologías</h2>
             <div class="galeria-topologias">
-                <div class="item-topologia" onclick="abrirModal('img/ccnalab2/a.jpg')">
-                    <img src="img/ccnalab2/a.jpg" alt="Topología 1">
+                <div class="item-topologia" onclick="abrirModal('img/ccnalab1/image.png')">
+                    <img src="img/ccnalab1/image.png" alt="Topología 1">
                     <div class="overlay">Ver más</div>
                 </div>
-                <div class="item-topologia" onclick="abrirModal('img/ccnalab2/a.jpg')">
-                    <img src="img/ccnalab2/a.jpg" alt="Topología 2">
+                <div class="item-topologia" onclick="abrirModal('img/ccnalab1/image2.jpg')">
+                    <img src="img/ccnalab1/image2.jpg" alt="Topología 2">
                     <div class="overlay">Ver más</div>
                 </div>
-                <div class="item-topologia" onclick="abrirModal('img/ccnalab2/a.jpg')">
-                    <img src="img/ccnp/lab1.png" alt="Topología 3">
+                <div class="item-topologia" onclick="abrirModal('img/ccnalab2/b.png')">
+                    <img src="img/ccnalab2/b.png" alt="Topología 3">
                     <div class="overlay">Ver más</div>
                 </div>
-                <div class="item-topologia" onclick="abrirModal('img/automatizacion/lab1.png')">
-                    <img src="img/automatizacion/lab1.png" alt="Topología 4">
+                <div class="item-topologia" onclick="abrirModal('img/ccnalab2/')">
+                    <img src="img/ccnalab2/a.jpg" alt="Topología 4">
                     <div class="overlay">Ver más</div>
                 </div>
                 <div class="item-topologia" onclick="abrirModal('img/seguridad/lab1.png')">
@@ -264,13 +312,13 @@
                 <h3>Contacto</h3>
                 <p>Si quieres ver más laboratorios, contáctame.</p>
                 <div class="contacto-enlaces">
-                    <a href="mailto:anderson@example.com"><i class="fas fa-envelope"></i> anderson@example.com</a>
+                    <a href="esaudreyes10@gmail.com"><i class="fas fa-envelope"></i> esaudreyes10@gmail.com</a>
                     <a href="https://www.linkedin.com" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a>
                     <a href="https://www.github.com" target="_blank"><i class="fab fa-github"></i> GitHub</a>
                 </div>
             </div>
             <div class="copyright">
-                <p>&copy; 2023 Anderson Her - Portafolio de Redes. Todos los derechos reservados.</p>
+                <p>&copy; 2026 Anderson Hernandez - Portafolio de Redes.</p>
             </div>
         </div>
     </footer>
