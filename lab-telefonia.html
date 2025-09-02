@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio: Telefonía IP con QoS y EIGRP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background-color: #0066a0;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        h2 {
+            font-size: 24px;
+            margin: 25px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #0066a0;
+            color: #0066a0;
+        }
+        
+        h3 {
+            font-size: 20px;
+            margin: 20px 0 10px;
+            color: #0066a0;
+        }
+        
+        section {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .objective {
+            background-color: #e8f4fc;
+            border-left: 5px solid #0066a0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #0066a0;
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        
+        .command {
+            color: #ffcc66;
+        }
+        
+        .comment {
+            color: #999;
+            font-style: italic;
+        }
+        
+        .config-section {
+            margin-bottom: 25px;
+        }
+        
+        .note {
+            background-color: #fff9e6;
+            border-left: 5px solid #ffcc00;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .topology-image {
+            text-align: center;
+            margin: 25px 0;
+        }
+        
+        .topology-image img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .caption {
+            font-style: italic;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            h2 {
+                font-size: 20px;
+            }
+            
+            section {
+                padding: 15px;
+            }
+            
+            pre {
+                font-size: 12px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Laboratorio: Telefonía IP con QoS y EIGRP</h1>
+        <p>Documentación completa del laboratorio CCNA Avanzado</p>
+    </header>
+
+    <section class="objective">
+        <h2>1) Objetivo</h2>
+        <p>Implementar una red escalable con telefonía IP, calidad de servicio (QoS) y conmutación VLAN en un entorno empresarial que incluya los departamentos de Ventas, Soporte y Administradores, garantizando:</p>
+        <ul>
+            <li>Priorización de tráfico de voz mediante QoS</li>
+            <li>Conectividad entre sedes mediante el protocolo de enrutamiento EIGRP</li>
+            <li>Segmentación con VLANs (10, 20, 30)</li>
+            <li>Configuración de teléfonos IP con VLAN de voz</li>
+            <li>Servicio DHCP para asignación de direcciones IP a teléfonos</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>2) Equipos y Recursos Utilizados</h2>
+        <table>
+            <tr>
+                <th>Equipo</th>
+                <th>Cantidad</th>
+                <th>Modelo</th>
+            </tr>
+            <tr>
+                <td>Router</td>
+                <td>6</td>
+                <td>Cisco 2811</td>
+            </tr>
+            <tr>
+                <td>Switch Capa 3</td>
+                <td>3</td>
+                <td>Cisco 3560-24PS</td>
+            </tr>
+            <tr>
+                <td>Computadoras</td>
+                <td>8</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Teléfonos IP</td>
+                <td>5</td>
+                <td>Cisco 7960</td>
+            </tr>
+        </table>
+    </section>
+
+    <section>
+        <h2>3) Topología y Roles</h2>
+        <ul>
+            <li><strong>R1:</strong> Sede Principal con subinterfaces para VLANs 10, 20, 30</li>
+            <li><strong>R2:</strong> Router Central interconectando sedes</li>
+            <li><strong>R3:</strong> Router de Distribución</li>
+            <li><strong>R4, R5, R6:</strong> Routers de Sede Remota</li>
+            <li><strong>SWL3:</strong> Switch de capa 3 con configuración de voz y datos</li>
+        </ul>
+        
+        <div class="topology-image">
+            <!-- Espacio para imagen de topología -->
+            <div style="background-color: #eee; padding: 40px; text-align: center; border-radius: 5px;">
+                <img src="img/ccnalab4/image.png" alt="Vista Rack" style="width:80%;">
+            </div>
+            <p class="caption">Figura 1: Topología de red con telefonía IP, QoS y EIGRP</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>4) Tabla de Direccionamiento IP</h2>
+        <table>
+            <tr>
+                <th>Dispositivo</th>
+                <th>Interfaz</th>
+                <th>Dirección IP</th>
+                <th>Máscara</th>
+                <th>VLAN/Descripción</th>
+            </tr>
+            <tr>
+                <td>R1</td>
+                <td>Se0/3/0</td>
+                <td>10.0.0.1</td>
+                <td>255.255.255.252</td>
+                <td>Enlace a R2</td>
+            </tr>
+            <tr>
+                <td>R1</td>
+                <td>Fa0/0.10</td>
+                <td>192.168.10.1</td>
+                <td>255.255.255.0</td>
+                <td>VLAN 10 VENTAS</td>
+            </tr>
+            <tr>
+                <td>R1</td>
+                <td>Fa0/0.20</td>
+                <td>192.168.20.1</td>
+                <td>255.255.255.0</td>
+                <td>VLAN 20 SOPORTE</td>
+            </tr>
+            <tr>
+                <td>R1</td>
+                <td>Fa0/0.30</td>
+                <td>192.168.30.1</td>
+                <td>255.255.255.0</td>
+                <td>VLAN 30 ADMIN</td>
+            </tr>
+            <tr>
+                <td>R2</td>
+                <td>Se0/3/0</td>
+                <td>10.0.0.2</td>
+                <td>255.255.255.252</td>
+                <td>Enlace a R1</td>
+            </tr>
+            <tr>
+                <td>R2</td>
+                <td>Se0/3/1</td>
+                <td>10.1.0.1</td>
+                <td>255.255.255.252</td>
+                <td>Enlace a R3</td>
+            </tr>
+            <tr>
+                <td>R2</td>
+                <td>Se0/2/0</td>
+                <td>10.4.0.1</td>
+                <td>255.255.255.252</td>
+                <td>Enlace a R4</td>
+            </tr>
+            <tr>
+                <td>R3</td>
+                <td>Se0/3/0</td>
+                <td>10.1.0.2</td>
+                <td>255.255.255.252</td>
+                <td>Enlace a R2</td>
+            </tr>
+            <tr>
+                <td>R3</td>
+                <td>Se0/3/1</td>
+                <td>10.2.0.1</td>
+                <td>255.255.255.252</td>
+                <td>Enlace a R5</td>
+            </tr>
+            <tr>
+                <td>R3</td>
+                <td>Se0/2/0</td>
+                <td>10.3.0.1</td>
+                <td>255.255.255.252</td>
+                <td>Enlace a R6</td>
+            </tr>
+            <tr>
+                <td>R4</td>
+                <td>Se0/3/0</td>
+                <td>10.4.0.2</td>
+                <td>255.255.255.252</td>
+                <td>Enlace a R2</td>
+            </tr>
+            <tr>
+                <td>R4</td>
+                <td>Fa0/0</td>
+                <td>172.16.1.1</td>
+                <td>255.255.255.0</td>
+                <td>LAN Sede 4</td>
+            </tr>
+            <tr>
+                <td>R5</td>
+                <td>Se0/3/0</td>
+                <td>10.2.0.2</td>
+                <td>255.255.255.252</td>
+                <td>Enlace a R3</td>
+            </tr>
+            <tr>
+                <td>R5</td>
+                <td>Fa0/0</td>
+                <td>172.16.2.1</td>
+                <td>255.255.255.0</td>
+                <td>LAN Sede 5</td>
+            </tr>
+            <tr>
+                <td>R6</td>
+                <td>Se0/3/0</td>
+                <td>10.3.0.2</td>
+                <td>255.255.255.252</td>
+                <td>Enlace a R3</td>
+            </tr>
+            <tr>
+                <td>R6</td>
+                <td>Fa0/0</td>
+                <td>172.16.3.1</td>
+                <td>255.255.255.0</td>
+                <td>LAN Sede 6</td>
+            </tr>
+        </table>
+    </section>
+
+    <section>
+        <h2>5) Configuración</h2>
+        
+        <div class="config-section">
+            <h3>5.1 Configuración de R1 (Sede Principal)</h3>
+            <pre><code><span class="command">hostname R1</span>
+<span class="comment">!</span>
+<span class="command">interface Serial0/3/0</span>
+<span class="command">ip address 10.0.0.1 255.255.255.252</span>
+<span class="command">clock rate 2000000</span>
+<span class="command">no shutdown</span>
+<span class="comment">!</span>
+<span class="command">interface FastEthernet0/0</span>
+<span class="command">no ip address</span>
+<span class="command">service-policy output QOS-DEKKO</span>
+<span class="command">duplex auto</span>
+<span class="command">speed auto</span>
+<span class="command">no shutdown</span>
+<span class="comment">!</span>
+<span class="command">interface FastEthernet0/0.10</span>
+<span class="command">encapsulation dot1Q 10</span>
+<span class="command">ip address 192.168.10.1 255.255.255.0</span>
+<span class="comment">!</span>
+<span class="command">interface FastEthernet0/0.20</span>
+<span class="command">encapsulation dot1Q 20</span>
+<span class="command">ip address 192.168.20.1 255.255.255.0</span>
+<span class="comment">!</span>
+<span class="command">interface FastEthernet0/0.30</span>
+<span class="command">encapsulation dot1Q 30</span>
+<span class="command">ip address 192.168.30.1 255.255.255.0</span>
+<span class="comment">!</span>
+<span class="command">router eigrp 100</span>
+<span class="command">network 10.0.0.0 0.0.0.3</span>
+<span class="command">network 192.168.10.0</span>
+<span class="command">network 192.168.20.0</span>
+<span class="command">network 192.168.30.0</span>
+<span class="command">no auto-summary</span>
+<span class="comment">!</span>
+<span class="command">ip dhcp excluded-address 192.168.20.1</span>
+<span class="command">ip dhcp pool Vlan-voz</span>
+<span class="command">network 192.168.20.0 255.255.255.0</span>
+<span class="command">default-router 192.168.20.1</span>
+<span class="command">option 150 ip 192.168.20.1</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>5.2 Configuración de R2 (Router Central)</h3>
+            <pre><code><span class="command">hostname R2</span>
+<span class="comment">!</span>
+<span class="command">interface Serial0/3/0</span>
+<span class="command">ip address 10.0.0.2 255.255.255.252</span>
+<span class="command">no shutdown</span>
+<span class="comment">!</span>
+<span class="command">interface Serial0/3/1</span>
+<span class="command">ip address 10.1.0.1 255.255.255.252</span>
+<span class="command">clock rate 2000000</span>
+<span class="command">no shutdown</span>
+<span class="comment">!</span>
+<span class="command">interface Serial0/2/0</span>
+<span class="command">ip address 10.4.0.1 255.255.255.252</span>
+<span class="command">clock rate 2000000</span>
+<span class="command">no shutdown</span>
+<span class="comment">!</span>
+<span class="command">router eigrp 100</span>
+<span class="command">network 10.0.0.0 0.0.0.3</span>
+<span class="command">network 10.1.0.0 0.0.0.3</span>
+<span class="command">network 10.4.0.0 0.0.0.3</span>
+<span class="command">no auto-summary</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>5.3 Configuración de R3 (Router Distribución)</h3>
+            <pre><code><span class="command">hostname R3</span>
+<span class="comment">!</span>
+<span class="command">interface Serial0/3/0</span>
+<span class="command">ip address 10.1.0.2 255.255.255.252</span>
+<span class="command">no shutdown</span>
+<span class="comment">!</span>
+<span class="command">interface Serial0/3/1</span>
+<span class="command">ip address 10.2.0.1 255.255.255.252</span>
+<span class="command">clock rate 2000000</span>
+<span class="command">no shutdown</span>
+<span class="comment">!</span>
+<span class="command">interface Serial0/2/0</span>
+<span class="command">ip address 10.3.0.1 255.255.255.252</span>
+<span class="command">clock rate 2000000</span>
+<span class="command">no shutdown</span>
+<span class="comment">!</span>
+<span class="command">router eigrp 100</span>
+<span class="command">network 10.1.0.0 0.0.0.3</span>
+<span class="command">network 10.2.0.0 0.0.0.3</span>
+<span class="command">network 10.3.0.0 0.0.0.3</span>
+<span class="command">no auto-summary</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>5.4 Configuración de R4 (Sede Remota 1)</h3>
+            <pre><code><span class="command">hostname R4</span>
+<span class="comment">!</span>
+<span class="command">interface Serial0/3/0</span>
+<span class="command">ip address 10.4.0.2 255.255.255.252</span>
+<span class="command">no shutdown</span>
+<span class="comment">!</span>
+<span class="command">interface FastEthernet0/0</span>
+<span class="command">ip address 172.16.1.1 255.255.255.0</span>
+<span class="command">no shutdown</span>
+<span class="comment">!</span>
+<span class="command">router eigrp 100</span>
+<span class="command">network 10.4.0.0 0.0.0.3</span>
+<span class="command">network 172.16.1.0 0.0.0.255</span>
+<span class="command">no auto-summary</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>5.5 Configuración de R5 (Sede Remota 2)</h3>
+            <pre><code><span class="command">hostname R5</span>
+<span class="comment">!</span>
+<span class="command">interface Serial0/3/0</span>
+<span class="command">ip address 10.2.0.2 255.255.255.252</span>
+<span class="command">no shutdown</span>
+<span class="comment">!</span>
+<span class="command">interface FastEthernet0/0</span>
+<span class="command">ip address 172.16.2.1 255.255.255.0</span>
+<span class="command">no shutdown</span>
+<span class="comment">!</span>
+<span class="command">router eigrp 100</span>
+<span class="command">network 10.2.0.0 0.0.0.3</span>
+<span class="command">network 172.16.2.0 0.0.0.255</span>
+<span class="command">no auto-summary</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>5.6 Configuración de R6 (Sede Remota 3)</h3>
+            <pre><code><span class="command">hostname R6</span>
+<span class="comment">!</span>
+<span class="command">interface Serial0/3/0</span>
+<span class="command">ip address 10.3.0.2 255.255.255.252</span>
+<span class="command">no shutdown</span>
+<span class="comment">!</span>
+<span class="command">interface FastEthernet0/0</span>
+<span class="command">ip address 172.16.3.1 255.255.255.0</span>
+<span class="command">no shutdown</span>
+<span class="comment">!</span>
+<span class="command">router eigrp 100</span>
+<span class="command">network 10.3.0.0 0.0.0.3</span>
+<span class="command">network 172.16.3.0 0.0.0.255</span>
+<span class="command">no auto-summary</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>5.7 Configuración del Switch SWL3</h3>
+            <pre><code><span class="comment">! Puerto troncal</span>
+<span class="command">interface FastEthernet0/1</span>
+<span class="command">switchport trunk encapsulation dot1q</span>
+<span class="command">switchport mode trunk</span>
+<span class="comment">!</span>
+<span class="comment">! Puertos de acceso y voz</span>
+<span class="command">interface FastEthernet0/2</span>
+<span class="command">switchport access vlan 10</span>
+<span class="command">switchport voice vlan 20</span>
+<span class="comment">!</span>
+<span class="command">interface FastEthernet0/24</span>
+<span class="command">switchport access vlan 10</span>
+<span class="command">switchport voice vlan 20</span>
+<span class="comment">!</span>
+<span class="comment">! Puerto de administración</span>
+<span class="command">interface FastEthernet0/3</span>
+<span class="command">switchport access vlan 30</span></code></pre>
+        </div>
+    </section>
+
+    <section>
+        <h2>6) Pruebas y Validación</h2>
+        
+        <div class="config-section">
+            <h3>6.1 Verificación EIGRP</h3>
+            <pre><code>R1#<span class="command">show ip route eigrp</span>
+R1#<span class="command">show ip eigrp neighbors</span>
+R1#<span class="command">show ip eigrp topology</span>
+R1#<span class="command">ping 172.16.1.1</span>
+R1#<span class="command">ping 172.16.2.1</span>
+R1#<span class="command">show ip route</span>
+
+<span class="comment">! Salida:</span>
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default, U - per-user static route, o - ODR
+       P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+10.0.0.0/8 is variably subnetted, 7 subnets, 2 masks
+C       10.0.0.0/30 is directly connected, Serial0/3/0
+L       10.0.0.1/32 is directly connected, Serial0/3/0
+D       10.1.0.0/30 [90/2681856] via 10.0.0.2, 00:01:55, Serial0/3/0
+D       10.2.0.0/30 [90/3193856] via 10.0.0.2, 00:01:55, Serial0/3/0
+D       10.3.0.0/30 [90/3705856] via 10.0.0.2, 00:01:55, Serial0/3/0
+D       10.4.0.0/30 [90/2681856] via 10.0.0.2, 00:01:55, Serial0/3/0
+D       10.5.0.0/30 [90/3193856] via 10.0.0.2, 00:01:55, Serial0/3/0
+
+172.16.0.0/24 is subnetted, 3 subnets
+D       172.16.1.0/24 [90/3708416] via 10.0.0.2, 00:01:55, Serial0/3/0
+D       172.16.2.0/24 [90/3708416] via 10.0.0.2, 00:01:55, Serial0/3/0
+D       172.16.3.0/24 [90/3708416] via 10.0.0.2, 00:01:55, Serial0/3/0
+
+192.168.10.0/24 is variably subnetted, 2 subnets, 2 masks
+C       192.168.10.0/24 is directly connected, FastEthernet0/0.10
+L       192.168.10.1/32 is directly connected, FastEthernet0/0.10
+
+192.168.20.0/24 is variably subnetted, 2 subnets, 2 masks
+C       192.168.20.0/24 is directly connected, FastEthernet0/0.20
+L       192.168.20.1/32 is directly connected, FastEthernet0/0.20
+
+192.168.30.0/24 is variably subnetted, 2 subnets, 2 masks
+C       192.168.30.0/24 is directly connected, FastEthernet0/0.30
+L       192.168.30.1/32 is directly connected, FastEthernet0/0.30
+
+D       192.168.100.0/24 [90/2684416] via 10.0.0.2, 00:01:55, Serial0/3/0
+D       192.168.200.0/24 [90/2684416] via 10.0.0.2, 00:01:55, Serial0/3/0</code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>6.2 Verificación de VLANs y Voz</h3>
+            <pre><code>SWL3#<span class="command">show vlan brief</span>
+SWL3#<span class="command">show interfaces status</span>
+SWL3#<span class="command">show interfaces trunk</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>6.3 Verificación de DHCP</h3>
+            <pre><code>R1#<span class="command">show ip dhcp binding</span>
+R1#<span class="command">show ip dhcp pool</span></code></pre>
+        </div>
+    </section>
+
+    <footer>
+        <p>Documentación de Laboratorio CCNA Avanzado - Telefonía IP con QoS y EIGRP</p>
+    </footer>
+</body>
+</html>
