@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio CCNA: OSPF Multiarea</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f8fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #0066a0 0%, #004d77 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        
+        h2 {
+            font-size: 26px;
+            margin: 30px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #0066a0;
+            color: #0066a0;
+        }
+        
+        h3 {
+            font-size: 22px;
+            margin: 25px 0 15px;
+            color: #004d77;
+        }
+        
+        h4 {
+            font-size: 18px;
+            margin: 20px 0 10px;
+            color: #0066a0;
+        }
+        
+        section {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .objective {
+            background-color: #e8f4fc;
+            border-left: 5px solid #0066a0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 14px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #0066a0;
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        tr:hover {
+            background-color: #f1f7fd;
+        }
+        
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-size: 15px;
+            line-height: 1.5;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        
+        .command {
+            color: #ffcc66;
+        }
+        
+        .comment {
+            color: #999;
+            font-style: italic;
+        }
+        
+        .config-section {
+            margin-bottom: 30px;
+            border-left: 4px solid #0066a0;
+            padding-left: 20px;
+        }
+        
+        .note {
+            background-color: #fff9e6;
+            border-left: 5px solid #ffcc00;
+            padding: 18px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .topology-image {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .topology-image img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .caption {
+            font-style: italic;
+            color: #666;
+            margin-top: 12px;
+            text-align: center;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 25px;
+            color: #666;
+            font-size: 16px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .device-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .device-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid #0066a0;
+        }
+        
+        .device-card h4 {
+            margin-top: 0;
+            color: #0066a0;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 26px;
+            }
+            
+            h2 {
+                font-size: 22px;
+            }
+            
+            section {
+                padding: 20px;
+            }
+            
+            pre {
+                font-size: 13px;
+                padding: 15px;
+            }
+            
+            .device-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>LABORATORIO OSPF MULTIAREA</h1>
+        <p class="subtitle">Implementación de áreas Backbone, Normal, Stub y NSSA</p>
+    </header>
+
+    <section class="objective">
+        <h2>Objetivo del Laboratorio</h2>
+        <p>Implementar OSPF Multiarea en una red corporativa, configurando áreas Backbone, Normal, Stub y NSSA para optimizar el enrutamiento y controlar la propagación de LSA.</p>
+        <ul>
+            <li>Configurar OSPF con múltiples áreas (0, 1, 2, 4)</li>
+            <li>Implementar área Backbone (Área 0) para interconexión entre áreas</li>
+            <li>Configurar área Normal (Área 1) para visibilidad completa de LSA</li>
+            <li>Implementar área Stub (Área 2) para reducir el tamaño de la base de datos OSPF</li>
+            <li>Configurar área NSSA (Área 4) para permitir redistribución de rutas externas</li>
+            <li>Verificar la conectividad entre todas las áreas y redes</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Topología y Dispositivos</h2>
+        
+        <div class="device-grid">
+            <div class="device-card">
+                <h4>Routers</h4>
+                <p>6 unidades (R1 a R6)</p>
+                <p><strong>Modelo:</strong> Cisco ISR</p>
+            </div>
+            
+            <div class="device-card">
+                <h4>Estaciones de Trabajo</h4>
+                <p>4 PCs (PC1 a PC4)</p>
+            </div>
+            
+            <div class="device-card">
+                <h4>Servidor DHCP</h4>
+                <p>Configurado en R5 y R6</p>
+            </div>
+        </div>
+        
+        <div class="topology-image">
+            <div style="background-color: #eef5fd; padding: 40px; text-align: center; border-radius: 8px;">
+                <div style="background-color: #eee; padding: 40px; text-align: center; border-radius: 5px;">
+                    <img src="img/ccnp1/ospf.png" alt="Vista Rack" style="width:80%;">
+                </div>
+            </div>
+            <p class="caption">Figura 1: Topología OSPF Multiarea con áreas 0, 1, 2 y 4</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>Tabla de Direccionamiento - Routers</h2>
+        <table>
+            <tr>
+                <th>Dispositivo</th>
+                <th>Router ID</th>
+                <th>Máscara</th>
+                <th>Área OSPF</th>
+            </tr>
+            <tr><td>R1</td><td>1.1.1.1</td><td>255.255.255.255</td><td>0</td></tr>
+            <tr><td>R2</td><td>2.2.2.2</td><td>255.255.255.255</td><td>0</td></tr>
+            <tr><td>R3</td><td>3.3.3.3</td><td>255.255.255.255</td><td>1</td></tr>
+            <tr><td>R4</td><td>4.4.4.4</td><td>255.255.255.255</td><td>2</td></tr>
+            <tr><td>R5</td><td>5.5.5.5</td><td>255.255.255.255</td><td>2</td></tr>
+            <tr><td>R6</td><td>6.6.6.6</td><td>255.255.255.255</td><td>4</td></tr>
+        </table>
+    </section>
+
+    <section>
+        <h2>Enlaces entre Routers</h2>
+        <table>
+            <tr>
+                <th>Enlace</th>
+                <th>Red</th>
+                <th>IP Local</th>
+                <th>IP Remota</th>
+                <th>Área OSPF</th>
+            </tr>
+            <tr><td>R2-R1</td><td>10.0.12.0/30</td><td>10.0.12.1</td><td>10.0.12.2</td><td>0</td></tr>
+            <tr><td>R2-R3</td><td>10.0.13.0/30</td><td>10.0.13.1</td><td>10.0.13.2</td><td>1</td></tr>
+            <tr><td>R2-R4</td><td>10.0.14.0/30</td><td>10.0.14.1</td><td>10.0.14.2</td><td>2</td></tr>
+            <tr><td>R4-R5</td><td>10.0.15.0/30</td><td>10.0.15.1</td><td>10.0.15.2</td><td>2</td></tr>
+            <tr><td>R2-R6</td><td>10.0.16.0/30</td><td>10.0.16.1</td><td>10.0.16.2</td><td>4</td></tr>
+        </table>
+    </section>
+
+    <section>
+        <h2>Redes LAN</h2>
+        <table>
+            <tr>
+                <th>Router</th>
+                <th>Interfaz</th>
+                <th>Red</th>
+                <th>Dirección IP</th>
+                <th>Máscara</th>
+                <th>Área OSPF</th>
+                <th>Propósito</th>
+            </tr>
+            <tr><td>R1</td><td>Ethernet0/1</td><td>172.16.3.0/24</td><td>172.16.3.1</td><td>255.255.255.0</td><td>0</td><td>PC2</td></tr>
+            <tr><td>R3</td><td>Ethernet0/2</td><td>172.16.2.0/24</td><td>172.16.2.1</td><td>255.255.255.0</td><td>1</td><td>PC3</td></tr>
+            <tr><td>R5</td><td>Ethernet0/1</td><td>172.16.1.0/24</td><td>172.16.1.1</td><td>255.255.255.0</td><td>2</td><td>PC4</td></tr>
+            <tr><td>R6</td><td>Ethernet0/1</td><td>172.16.4.0/24</td><td>172.16.4.1</td><td>255.255.255.0</td><td>4</td><td>PC1</td></tr>
+        </table>
+    </section>
+
+    <section>
+        <h2>Configuración de Áreas OSPF</h2>
+        <table>
+            <tr>
+                <th>Área</th>
+                <th>Tipo de Área</th>
+                <th>Routers en el Área</th>
+                <th>Resumen</th>
+            </tr>
+            <tr><td>0</td><td>Backbone</td><td>R1, R2</td><td>Área troncal</td></tr>
+            <tr><td>1</td><td>Normal</td><td>R3</td><td>Área estándar</td></tr>
+            <tr><td>2</td><td>Stub</td><td>R4, R5</td><td>Área stub</td></tr>
+            <tr><td>4</td><td>NSSA</td><td>R6</td><td>Área NSSA con redistribución a ISP</td></tr>
+        </table>
+    </section>
+
+    <section>
+        <h2>Direccionamiento para PCs</h2>
+        <table>
+            <tr>
+                <th>PC</th>
+                <th>Red</th>
+                <th>Gateway</th>
+                <th>DHCP Server</th>
+                <th>Rango DHCP</th>
+            </tr>
+            <tr><td>PC1</td><td>172.16.4.0/24</td><td>172.16.4.1</td><td>R6</td><td>172.16.4.2-254</td></tr>
+            <tr><td>PC2</td><td>172.16.3.0/24</td><td>172.16.3.1</td><td>-</td><td>Configuración estática</td></tr>
+            <tr><td>PC3</td><td>172.16.2.0/24</td><td>172.16.2.1</td><td>-</td><td>Configuración estática</td></tr>
+            <tr><td>PC4</td><td>172.16.1.0/24</td><td>172.16.1.1</td><td>R5</td><td>172.16.1.2-254</td></tr>
+        </table>
+    </section>
+
+    <section>
+        <h2>Configuración de OSPF</h2>
+        
+        <div class="config-section">
+            <h3>Configuración en R1</h3>
+            <pre><code><span class="command">router ospf 1</span>
+<span class="command">router-id 1.1.1.1</span>
+<span class="command">network 1.1.1.1 0.0.0.0 area 0</span>
+<span class="command">network 10.0.12.0 0.0.0.3 area 0</span>
+<span class="command">network 172.16.3.0 0.0.0.255 area 0</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>Configuración en R2 (ABR)</h3>
+            <pre><code><span class="command">router ospf 1</span>
+<span class="command">router-id 2.2.2.2</span>
+<span class="command">network 2.2.2.2 0.0.0.0 area 0</span>
+<span class="command">network 10.0.12.0 0.0.0.3 area 0</span>
+<span class="command">network 10.0.13.0 0.0.0.3 area 1</span>
+<span class="command">network 10.0.14.0 0.0.0.3 area 2</span>
+<span class="command">network 10.0.16.0 0.0.0.3 area 4</span>
+<span class="command">area 2 stub</span>
+<span class="command">area 4 nssa</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>Configuración en R3 (Área Normal)</h3>
+            <pre><code><span class="command">router ospf 1</span>
+<span class="command">router-id 3.3.3.3</span>
+<span class="command">network 3.3.3.3 0.0.0.0 area 1</span>
+<span class="command">network 10.0.13.0 0.0.0.3 area 1</span>
+<span class="command">network 172.16.2.0 0.0.0.255 area 1</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>Configuración en R4 (Área Stub)</h3>
+            <pre><code><span class="command">router ospf 1</span>
+<span class="command">router-id 4.4.4.4</span>
+<span class="command">area 2 stub</span>
+<span class="command">network 4.4.4.4 0.0.0.0 area 2</span>
+<span class="command">network 10.0.14.0 0.0.0.3 area 2</span>
+<span class="command">network 10.0.15.0 0.0.0.3 area 2</span>
+<span class="command">area 2 stub</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>Configuración en R5 (Área Stub)</h3>
+            <pre><code><span class="command">router ospf 1</span>
+<span class="command">router-id 5.5.5.5</span>
+<span class="command">area 2 stub</span>
+<span class="command">network 5.5.5.5 0.0.0.0 area 2</span>
+<span class="command">network 10.0.15.0 0.0.0.3 area 2</span>
+<span class="command">network 172.16.1.0 0.0.0.255 area 2</span>
+<span class="command">area 2 stub</span>
+</code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>Configuración en R6 (Área NSSA)</h3>
+            <pre><code><span class="command">router ospf 1</span>
+<span class="command">router-id 6.6.6.6</span>
+<span class="command">area 4 nssa</span>
+<span class="command">network 6.6.6.6 0.0.0.0 area 4</span>
+<span class="command">network 10.0.16.0 0.0.0.3 area 4</span>
+<span class="command">network 172.16.4.0 0.0.0.255 area 4</span>
+<span class="comment">! Redistribución de rutas estáticas (simulando conexión a ISP)</span>
+<span class="command">redistribute static subnets</span>
+<span class="command">area 4 nssa</span></code></pre>
+        </div>
+    </section>
+
+    <section>
+        <h2>Explicación del Diseño de Áreas OSPF</h2>
+        
+        <div class="config-section">
+            <h3>Área 0 - Backbone (R1 ↔ R2)</h3>
+            <p><strong>Por qué se eligió:</strong> OSPF requiere que todas las áreas se conecten al backbone para permitir la comunicación entre áreas.</p>
+            <p><strong>Función principal:</strong> Centraliza el intercambio de información entre todas las demás áreas.</p>
+            <p><strong>Justificación técnica:</strong> Si el backbone no existiera, sería necesario configurar túneles virtuales para conectar áreas, lo cual aumenta la complejidad.</p>
+        </div>
+
+        <div class="config-section">
+            <h3>Área 1 - Normal (R2 ↔ R3)</h3>
+            <p><strong>Por qué se eligió:</strong> En esta zona se necesitan todas las LSA (1, 2, 3, 4, 5 y 7) para una visibilidad completa de la topología.</p>
+            <p><strong>Función principal:</strong> R3 tiene acceso a todos los prefijos y rutas sin restricciones.</p>
+            <p><strong>Justificación técnica:</strong> Mantener esta área como normal permite que R3 reciba tanto rutas internas como externas, sin filtrar información.</p>
+        </div>
+
+        <div class="config-section">
+            <h3>Área 2 - Stub (R2 ↔ R4 ↔ R5)</h3>
+            <p><strong>Por qué se eligió:</strong> Esta área conecta routers internos que no necesitan conocer todas las redes externas, solo necesitan una ruta por defecto hacia R2.</p>
+            <p><strong>Función principal:</strong> Reducir el tamaño de la base de datos OSPF, evitando que las LSA de tipo 5 (rutas externas) se propaguen.</p>
+            <p><strong>Justificación técnica:</strong> Un área stub es ideal para routers con menos recursos porque disminuye el consumo de CPU y memoria.</p>
+            <p><strong>Efecto esperado:</strong> R4 y R5 solo conocen su propia área y una ruta por defecto, mejorando la eficiencia.</p>
+        </div>
+
+        <div class="config-section">
+            <h3>Área 4 - NSSA (R2 ↔ R6 → ISP)</h3>
+            <p><strong>Por qué se eligió:</strong> Esta área conecta la red interna con Internet. NSSA permite que un router dentro del área (R6) redistribuya rutas externas hacia OSPF.</p>
+            <p><strong>Función principal:</strong> Permitir que R6 anuncie las rutas del ISP como LSA tipo 7, que luego R2 convierte en LSA tipo 5 para el resto de las áreas.</p>
+            <p><strong>Justificación técnica:</strong> Si se hubiera usado un área stub, no sería posible redistribuir las rutas externas. NSSA es ideal cuando un área necesita acceso a Internet, pero sin propagar todas las rutas externas.</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>Verificación y Pruebas</h2>
+        
+        <div class="config-section">
+            <h3>Verificación de Vecinos OSPF en R2</h3>
+            <pre><code>R2#<span class="command">show ip ospf neighbor</span>
+
+Neighbor ID    Pri   State           Dead Time   Address         Interface
+1.1.1.1         1   FULL/BDR        00:00:38    10.0.12.2       Ethernet0/0
+3.3.3.3         1   FULL/DR         00:00:33    10.0.13.2       Ethernet0/1
+4.4.4.4         1   FULL/DR         00:00:36    10.0.14.2       Ethernet0/2
+6.6.6.6         1   FULL/DR         00:00:36    10.0.16.2       Ethernet0/3</code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>Verificación de Rutas OSPF en R6</h3>
+            <pre><code>R6#<span class="command">show ip route ospf</span>
+
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override
+
+Gateway of last resort is 192.168.116.2 to network 0.0.0.0
+
+      1.0.0.0/32 is subnetted, 1 subnets
+O IA     1.1.1.1 [110/21] via 10.0.16.1, 00:08:40, Ethernet0/3
+      2.0.0.0/32 is subnetted, 1 subnets
+O IA     2.2.2.2 [110/11] via 10.0.16.1, 00:08:41, Ethernet0/3
+      3.0.0.0/32 is subnetted, 1 subnets
+O IA     3.3.3.3 [110/21] via 10.0.16.1, 00:08:41, Ethernet0/3
+      4.0.0.0/32 is subnetted, 1 subnets
+O IA     4.4.4.4 [110/21] via 10.0.16.1, 00:08:41, Ethernet0/3
+      10.0.0.0/8 is variably subnetted, 5 subnets, 2 masks
+O IA     10.0.12.0/30 [110/20] via 10.0.16.1, 00:08:41, Ethernet0/3
+O IA     10.0.13.0/30 [110/20] via 10.0.16.1, 00:08:41, Ethernet0/3
+O IA     10.0.14.0/30 [110/20] via 10.0.16.1, 00:08:41, Ethernet0/3
+      172.16.0.0/24 is subnetted, 1 subnets
+O IA     172.16.3.0 [110/30] via 10.0.16.1, 00:08:40, Ethernet0/3</code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>Base de Datos OSPF en R6</h3>
+            <pre><code>R6#<span class="command">show ip ospf database</span>
+
+OSPF Router with ID (6.6.6.6) (Process ID 1)
+
+                Router Link States (Area 4)
+
+Link ID         ADV Router      Age         Seq#       Checksum Link count
+2.2.2.2         2.2.2.2         548         0x80000002 0x00DAFD 1
+6.6.6.6         6.6.6.6         547         0x80000002 0x00B404 1
+
+                Net Link States (Area 4)
+
+Link ID         ADV Router      Age         Seq#       Checksum
+10.0.16.2       6.6.6.6         547         0x80000001 0x00687A
+
+                Summary Net Link States (Area 4)
+
+Link ID         ADV Router      Age         Seq#       Checksum
+1.1.1.1         2.2.2.2         543         0x80000001 0x0033EC
+2.2.2.2         2.2.2.2         588         0x80000001 0x00A085
+3.3.3.3         2.2.2.2         553         0x80000001 0x00D641
+4.4.4.4         2.2.2.2         553         0x80000001 0x00A86B
+10.0.12.0       2.2.2.2         588         0x80000001 0x003ED3
+10.0.13.0       2.2.2.2         588         0x80000001 0x0033DD
+10.0.14.0       2.2.2.2         588         0x80000001 0x0028E7
+172.16.3.0      2.2.2.2         543         0x80000001 0x001546</code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>Verificación de Protocolos en R1</h3>
+            <pre><code>R1#<span class="command">show ip protocols</span>
+
+*** IP Routing is NSF aware ***
+
+Routing Protocol is "application"
+  Sending updates every 0 seconds
+  Invalid after 0 seconds, hold down 0, flushed after 0
+  Outgoing update filter list for all interfaces is not set
+  Incoming update filter list for all interfaces is not set
+  Maximum path: 32
+  Routing for Networks:
+  Routing Information Sources:
+    Gateway         Distance      Last Update
+  Distance: (default is 4)
+
+Routing Protocol is "ospf 1"
+  Outgoing update filter list for all interfaces is not set
+  Incoming update filter list for all interfaces is not set
+  Router ID 1.1.1.1
+  Number of areas in this router is 1. 1 normal 0 stub 0 nssa
+  Maximum path: 4
+  Routing for Networks:
+    1.1.1.1 0.0.0.0 area 0
+    10.0.12.0 0.0.0.3 area 0
+    172.16.3.0 0.0.0.255 area 0
+  Routing Information Sources:
+    Gateway         Distance      Last Update
+    2.2.2.2         110           00:01:00
+  Distance: (default is 110)</code></pre>
+        </div>
+    </section>
+
+    <section>
+        <h2>Conclusiones</h2>
+        <ul>
+            <li>OSPF Multiarea mejora la <strong>escalabilidad</strong> de la red.</li>
+            <li>El uso de áreas <strong>Stub</strong> y <strong>NSSA</strong> reduce el consumo de CPU y memoria.</li>
+            <li>La implementación correcta permite que los routers intercambien rutas de forma eficiente.</li>
+            <li>La segmentación en áreas permite un mejor control del tráfico y de las actualizaciones de enrutamiento.</li>
+            <li>El diseño multiarea facilita la administración y solución de problemas en redes grandes.</li>
+        </ul>
+    </section>
+
+    <footer>
+        <p>Documentación de Laboratorio OSPF Multiarea - CCNA</p>
+        <p>© 2023 - Laboratorio de Redes</p>
+    </footer>
+</body>
+</html>

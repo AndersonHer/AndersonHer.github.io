@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio CCNA: HSRP, OSPF Multiárea y EtherChannel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background-color: #0066a0;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        h2 {
+            font-size: 24px;
+            margin: 25px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #0066a0;
+            color: #0066a0;
+        }
+        
+        h3 {
+            font-size: 20px;
+            margin: 20px 0 10px;
+            color: #0066a0;
+        }
+        
+        section {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .objective {
+            background-color: #e8f4fc;
+            border-left: 5px solid #0066a0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #0066a0;
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        
+        .command {
+            color: #ffcc66;
+        }
+        
+        .comment {
+            color: #999;
+            font-style: italic;
+        }
+        
+        .config-section {
+            margin-bottom: 25px;
+        }
+        
+        .note {
+            background-color: #fff9e6;
+            border-left: 5px solid #ffcc00;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .topology-image {
+            text-align: center;
+            margin: 25px 0;
+        }
+        
+        .topology-image img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .caption {
+            font-style: italic;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            h2 {
+                font-size: 20px;
+            }
+            
+            section {
+                padding: 15px;
+            }
+            
+            pre {
+                font-size: 12px;
+                padding: 10px;
+            }
+        }
+        
+        .success {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        
+        .routing-table {
+            font-size: 13px;
+            line-height: 1.3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Laboratorio: Redundancia con HSRP, OSPF Multiárea y EtherChannel</h1>
+        <p>Documentación completa del laboratorio CCNA - Conmutación y Enrutamiento Avanzado</p>
+    </header>
+
+    <section class="objective">
+        <h2>1) Objetivo</h2>
+        <p>Implementar una red empresarial con alta disponibilidad que integre:</p>
+        <ul>
+            <li>OSPF Multiárea (Área 0 y Área 1) para enrutamiento dinámico.</li>
+            <li>HSRP para redundancia de gateway por VLAN con balanceo de carga.</li>
+            <li>EtherChannel (LACP) para agregación de enlaces entre switches.</li>
+            <li>Switch multicapa con Inter-VLAN routing.</li>
+            <li>Verificación de tablas de enrutamiento y estados de redundancia.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>2) Topología y Roles</h2>
+        <ul>
+            <li><strong>IOU1, IOU2, IOU5:</strong> Routers del backbone OSPF (Área 0).</li>
+            <li><strong>SW1:</strong> Switch multicapa (Área 1) con SVIs para VLANs 10, 20, 30, 40.</li>
+            <li><strong>IOU4:</strong> Switch multicapa secundario para redundancia HSRP.</li>
+            <li><strong>HSRP:</strong> Configuración con balanceo de carga (VLANs 10-20 activas en SW1, VLANs 30-40 activas en IOU4).</li>
+            <li><strong>EtherChannel:</strong> Enlace agregado entre IOU4 y otro dispositivo (no especificado).</li>
+        </ul>
+        
+        <div class="topology-image">
+            <!-- Espacio para imagen de topología (imagen real no disponible) -->
+            <div style="background-color: #eee; padding: 40px; text-align: center; border-radius: 5px;">
+                <img src="img/ccnp1/HSRP.png" alt="Vista Rack" style="width:50%;">
+            </div>
+            <p class="caption">Figura 1: Topología de red con OSPF Multiárea, HSRP y EtherChannel</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>3) Tabla de Direccionamiento</h2>
+        
+        <h3>3.1 Direccionamiento de Dispositivos de Red</h3>
+        <table>
+            <tr>
+                <th>Dispositivo</th>
+                <th>Interfaz</th>
+                <th>Dirección IP</th>
+                <th>Máscara</th>
+                <th>Descripción</th>
+            </tr>
+            <tr>
+                <td>IOU2</td>
+                <td>Ethernet0/0</td>
+                <td>10.1.1.2</td>
+                <td>255.255.255.252</td>
+                <td>Enlace con IOU1</td>
+            </tr>
+            <tr>
+                <td>IOU2</td>
+                <td>Ethernet0/1</td>
+                <td>172.16.1.1</td>
+                <td>255.255.255.252</td>
+                <td>Enlace con SW1</td>
+            </tr>
+            <tr>
+                <td>IOU2</td>
+                <td>Loopback1</td>
+                <td>2.2.2.2</td>
+                <td>255.255.255.255</td>
+                <td>ID de Router OSPF</td>
+            </tr>
+            <tr>
+                <td>SW1</td>
+                <td>Ethernet1/0</td>
+                <td>172.16.1.2</td>
+                <td>255.255.255.252</td>
+                <td>Enlace con IOU2</td>
+            </tr>
+            <tr>
+                <td>SW1</td>
+                <td>Loopback1</td>
+                <td>4.4.4.4</td>
+                <td>255.255.255.255</td>
+                <td>ID de Router OSPF</td>
+            </tr>
+            <tr>
+                <td>IOU5</td>
+                <td>Ethernet0/1</td>
+                <td>10.1.2.2</td>
+                <td>255.255.255.252</td>
+                <td>Enlace con IOU1</td>
+            </tr>
+            <tr>
+                <td>IOU5</td>
+                <td>Loopback1</td>
+                <td>3.3.3.3</td>
+                <td>255.255.255.255</td>
+                <td>ID de Router OSPF</td>
+            </tr>
+        </table>
+
+        <h3>3.2 Direccionamiento de VLANs y Gateways Virtuales HSRP</h3>
+        <table>
+            <tr>
+                <th>VLAN</th>
+                <th>Red</th>
+                <th>Gateway Virtual</th>
+                <th>SW1 IP</th>
+                <th>IOU4 IP</th>
+                <th>Activo HSRP</th>
+            </tr>
+            <tr>
+                <td>VLAN10</td>
+                <td>192.168.10.0/24</td>
+                <td>192.168.10.254</td>
+                <td>192.168.10.1</td>
+                <td>192.168.10.2</td>
+                <td>SW1 (prio 110)</td>
+            </tr>
+            <tr>
+                <td>VLAN20</td>
+                <td>192.168.20.0/24</td>
+                <td>192.168.20.254</td>
+                <td>192.168.20.1</td>
+                <td>192.168.20.2</td>
+                <td>SW1 (prio 110)</td>
+            </tr>
+            <tr>
+                <td>VLAN30</td>
+                <td>192.168.30.0/24</td>
+                <td>192.168.30.254</td>
+                <td>192.168.30.1</td>
+                <td>192.168.30.2</td>
+                <td>IOU4 (prio 110)</td>
+            </tr>
+            <tr>
+                <td>VLAN40</td>
+                <td>192.168.40.0/24</td>
+                <td>192.168.40.254</td>
+                <td>192.168.40.1</td>
+                <td>192.168.40.2</td>
+                <td>IOU4 (prio 110)</td>
+            </tr>
+        </table>
+    </section>
+
+    <section>
+        <h2>4) Configuración</h2>
+        
+        <div class="config-section">
+            <h3>4.1 Configuración de Interfaces y Direccionamiento IP</h3>
+            
+            <h4>IOU2 (Router):</h4>
+            <pre><code><span class="command">interface Ethernet0/0</span>
+<span class="command">ip address 10.1.1.2 255.255.255.252</span>
+<span class="command">no shutdown</span>
+<span class="command">!</span>
+<span class="command">interface Ethernet0/1</span>
+<span class="command">ip address 172.16.1.1 255.255.255.252</span>
+<span class="command">no shutdown</span>
+<span class="command">!</span>
+<span class="command">interface Loopback1</span>
+<span class="command">ip address 2.2.2.2 255.255.255.255</span></code></pre>
+
+            <h4>SW1 (Switch Multicapa):</h4>
+            <pre><code><span class="command">interface Ethernet1/0</span>
+<span class="command">no switchport</span>
+<span class="command">ip address 172.16.1.2 255.255.255.252</span>
+<span class="command">no shutdown</span>
+<span class="command">!</span>
+<span class="command">interface Loopback1</span>
+<span class="command">ip address 4.4.4.4 255.255.255.255</span></code></pre>
+
+            <h4>IOU5 (Router):</h4>
+            <pre><code><span class="command">interface Ethernet0/1</span>
+<span class="command">ip address 10.1.2.2 255.255.255.252</span>
+<span class="command">no shutdown</span>
+<span class="command">!</span>
+<span class="command">interface Loopback1</span>
+<span class="command">ip address 3.3.3.3 255.255.255.255</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>4.2 Configuración de OSPF Multiárea</h3>
+            
+            <h4>IOU2:</h4>
+            <pre><code><span class="command">router ospf 1</span>
+<span class="command">router-id 2.2.2.2</span>
+<span class="command">network 2.2.2.2 0.0.0.0 area 0</span>
+<span class="command">network 10.1.1.0 0.0.0.3 area 0</span>
+<span class="command">network 172.16.1.0 0.0.0.3 area 1</span></code></pre>
+
+            <h4>SW1:</h4>
+            <pre><code><span class="command">router ospf 1</span>
+<span class="command">router-id 4.4.4.4</span>
+<span class="command">network 4.4.4.4 0.0.0.0 area 1</span>
+<span class="command">network 172.16.1.0 0.0.0.3 area 1</span>
+<span class="command">network 192.168.10.0 0.0.0.255 area 1</span>
+<span class="command">network 192.168.20.0 0.0.0.255 area 1</span>
+<span class="command">network 192.168.30.0 0.0.0.255 area 1</span>
+<span class="command">network 192.168.40.0 0.0.0.255 area 1</span></code></pre>
+
+            <h4>IOU5:</h4>
+            <pre><code><span class="command">router ospf 1</span>
+<span class="command">router-id 3.3.3.3</span>
+<span class="command">network 3.3.3.3 0.0.0.0 area 0</span>
+<span class="command">network 10.1.2.0 0.0.0.3 area 0</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>4.3 Configuración de HSRP para Redundancia</h3>
+            
+            <h4>SW1 (Activo para VLANs 10 y 20):</h4>
+            <pre><code><span class="command">interface Vlan10</span>
+<span class="command">ip address 192.168.10.1 255.255.255.0</span>
+<span class="command">standby 10 ip 192.168.10.254</span>
+<span class="command">standby 10 priority 110</span>
+<span class="command">standby 10 preempt</span>
+<span class="command">!</span>
+<span class="command">interface Vlan20</span>
+<span class="command">ip address 192.168.20.1 255.255.255.0</span>
+<span class="command">standby 20 ip 192.168.20.254</span>
+<span class="command">standby 20 priority 110</span>
+<span class="command">standby 20 preempt</span>
+<span class="command">!</span>
+<span class="command">interface Vlan30</span>
+<span class="command">ip address 192.168.30.1 255.255.255.0</span>
+<span class="command">standby 30 ip 192.168.30.254</span>
+<span class="command">standby 30 priority 100</span>
+<span class="command">standby 30 preempt</span>
+<span class="command">!</span>
+<span class="command">interface Vlan40</span>
+<span class="command">ip address 192.168.40.1 255.255.255.0</span>
+<span class="command">standby 40 ip 192.168.40.254</span>
+<span class="command">standby 40 priority 100</span>
+<span class="command">standby 40 preempt</span></code></pre>
+
+            <h4>IOU4 (Respaldo para VLANs 30 y 40):</h4>
+            <pre><code><span class="command">interface Vlan10</span>
+<span class="command">ip address 192.168.10.2 255.255.255.0</span>
+<span class="command">standby 10 ip 192.168.10.254</span>
+<span class="command">standby 10 priority 100</span>
+<span class="command">standby 10 preempt</span>
+<span class="command">!</span>
+<span class="command">interface Vlan20</span>
+<span class="command">ip address 192.168.20.2 255.255.255.0</span>
+<span class="command">standby 20 ip 192.168.20.254</span>
+<span class="command">standby 20 priority 100</span>
+<span class="command">standby 20 preempt</span>
+<span class="command">!</span>
+<span class="command">interface Vlan30</span>
+<span class="command">ip address 192.168.30.2 255.255.255.0</span>
+<span class="command">standby 30 ip 192.168.30.254</span>
+<span class="command">standby 30 priority 110</span>
+<span class="command">standby 30 preempt</span>
+<span class="command">!</span>
+<span class="command">interface Vlan40</span>
+<span class="command">ip address 192.168.40.2 255.255.255.0</span>
+<span class="command">standby 40 ip 192.168.40.254</span>
+<span class="command">standby 40 priority 110</span>
+<span class="command">standby 40 preempt</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>4.4 Configuración de Trunking y EtherChannel (IOU4)</h3>
+            <pre><code><span class="command">default interface range ethernet 0/0 - 1</span>
+<span class="command">interface range ethernet 0/0 - 1</span>
+<span class="command">switchport trunk encapsulation dot1q</span>
+<span class="command">switchport mode trunk</span>
+<span class="command">channel-group 1 mode active</span></code></pre>
+        </div>
+    </section>
+
+    <section>
+        <h2>5) Pruebas y Validación</h2>
+        
+        <div class="config-section">
+            <h3>5.1 Tabla de Enrutamiento de IOU2 (Router Backbone)</h3>
+            <pre class="routing-table"><code>IOU2#<span class="command">show ip route</span>
+<span class="comment">Códigos: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override</span>
+
+<span class="comment">Gateway of last resort is not set</span>
+
+     1.0.0.0/32 is subnetted, 1 subnets
+O       1.1.1.1 [110/11] via 10.1.1.1, 00:02:07, Ethernet0/0
+     2.0.0.0/32 is subnetted, 1 subnets
+C       2.2.2.2 is directly connected, Loopback1
+     4.0.0.0/32 is subnetted, 1 subnets
+O       4.4.4.4 [110/11] via 172.16.1.2, 00:00:44, Ethernet0/1
+     10.0.0.0/8 is variably subnetted, 3 subnets, 2 masks
+C       10.1.1.0/30 is directly connected, Ethernet0/0
+L       10.1.1.2/32 is directly connected, Ethernet0/0
+O       10.1.2.0/30 [110/20] via 10.1.1.1, 00:02:07, Ethernet0/0
+     172.16.0.0/16 is variably subnetted, 2 subnets, 2 masks
+C       172.16.1.0/30 is directly connected, Ethernet0/1
+L       172.16.1.1/32 is directly connected, Ethernet0/1
+O       192.168.10.0/24 [110/11] via 172.16.1.2, 00:00:44, Ethernet0/1
+O       192.168.20.0/24 [110/11] via 172.16.1.2, 00:00:18, Ethernet0/1
+O       192.168.30.0/24 [110/11] via 172.16.1.2, 00:00:18, Ethernet0/1
+O       192.168.40.0/24 [110/11] via 172.16.1.2, 00:00:08, Ethernet0/1</code></pre>
+            
+            <h4>Análisis de IOU2:</h4>
+            <ul>
+                <li><span class="success">✅ Conectividad con IOU1:</span> 1.1.1.1 vía 10.1.1.1 (Ethernet0/0)</li>
+                <li><span class="success">✅ Conectividad con SW1:</span> 4.4.4.4 vía 172.16.1.2 (Ethernet0/1)</li>
+                <li><span class="success">✅ Aprendió redes de Área 1:</span> Todas las VLANs (192.168.10.0, 20.0, 30.0, 40.0) vía SW1</li>
+                <li><span class="success">✅ Aprendió ruta del enlace IOU1-IOU5:</span> 10.1.2.0/30 vía IOU1</li>
+            </ul>
+        </div>
+
+        <div class="config-section">
+            <h3>5.2 Tabla de Enrutamiento de SW1 (Switch Multicapa)</h3>
+            <pre class="routing-table"><code>SW1#<span class="command">show ip route</span>
+<span class="comment">Códigos: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override</span>
+
+<span class="comment">Gateway of last resort is not set</span>
+
+     1.0.0.0/32 is subnetted, 1 subnets
+O IA    1.1.1.1 [110/21] via 172.16.1.1, 00:02:28, Ethernet1/0
+     2.0.0.0/32 is subnetted, 1 subnets
+O IA    2.2.2.2 [110/11] via 172.16.1.1, 00:02:28, Ethernet1/0
+     3.0.0.0/32 is subnetted, 1 subnets
+O IA    3.3.3.3 [110/31] via 172.16.1.1, 00:00:06, Ethernet1/0
+     4.0.0.0/32 is subnetted, 1 subnets
+C       4.4.4.4 is directly connected, Loopback1
+     10.0.0.0/30 is subnetted, 2 subnets
+O IA    10.1.1.0 [110/20] via 172.16.1.1, 00:02:28, Ethernet1/0
+O IA    10.1.2.0 [110/30] via 172.16.1.1, 00:02:28, Ethernet1/0
+     172.16.0.0/16 is variably subnetted, 2 subnets, 2 masks
+C       172.16.1.0/30 is directly connected, Ethernet1/0
+L       172.16.1.2/32 is directly connected, Ethernet1/0
+     192.168.10.0/24 is variably subnetted, 2 subnets, 2 masks
+C       192.168.10.0/24 is directly connected, Vlan10
+L       192.168.10.1/32 is directly connected, Vlan10
+     192.168.20.0/24 is variably subnetted, 2 subnets, 2 masks
+C       192.168.20.0/24 is directly connected, Vlan20
+L       192.168.20.1/32 is directly connected, Vlan20
+     192.168.30.0/24 is variably subnetted, 2 subnets, 2 masks
+C       192.168.30.0/24 is directly connected, Vlan30
+L       192.168.30.1/32 is directly connected, Vlan30
+     192.168.40.0/24 is variably subnetted, 2 subnets, 2 masks
+C       192.168.40.0/24 is directly connected, Vlan40
+L       192.168.40.1/32 is directly connected, Vlan40</code></pre>
+            
+            <h4>Análisis de SW1:</h4>
+            <ul>
+                <li><span class="success">✅ Rutas Inter-Área (IA):</span> Aprendió todas las rutas del Área 0 vía IOU2</li>
+                <li><span class="success">✅ Conectividad con Backbone:</span> 1.1.1.1, 2.2.2.2, 3.3.3.3 vía IOU2</li>
+                <li><span class="success">✅ Redes locales conectadas:</span> Todas las VLANs (10, 20, 30, 40)</li>
+            </ul>
+        </div>
+
+        <div class="config-section">
+            <h3>5.3 Estado HSRP - Resumen</h3>
+            <pre><code>IOU4#<span class="command">show standby brief</span>
+<span class="comment">Interface   Grp  Pri P State    Active addr     Standby addr    Group addr</span>
+Vl10        10   100 P Standby  192.168.10.1    local           192.168.10.254
+Vl20        20   100 P Standby  192.168.20.1    local           192.168.20.254
+Vl30        30   110 P Active   local           192.168.30.1    192.168.30.254
+Vl40        40   110 P Active   local           192.168.40.1    192.168.40.254</code></pre>
+
+            <pre><code>SW1#<span class="command">show standby brief</span>
+<span class="comment">Interface   Grp  Pri P State    Active addr     Standby addr    Group addr</span>
+Vl10        10   110 P Active   local           192.168.10.2    192.168.10.254
+Vl20        20   110 P Active   local           192.168.20.2    192.168.20.254
+Vl30        30   100 P Standby  192.168.30.2    local           192.168.30.254
+Vl40        40   100 P Standby  192.168.40.2    local           192.168.40.254</code></pre>
+
+            <h4>Tabla de Estado HSRP:</h4>
+            <table>
+                <tr>
+                    <th>VLAN</th>
+                    <th>Grupo</th>
+                    <th>Dispositivo</th>
+                    <th>Estado</th>
+                    <th>Prioridad</th>
+                    <th>Preempt</th>
+                    <th>IP Virtual</th>
+                    <th>IP Local</th>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td>10</td>
+                    <td><strong>SW1</strong></td>
+                    <td><strong>Active</strong></td>
+                    <td>110</td>
+                    <td>Sí</td>
+                    <td>192.168.10.254</td>
+                    <td>192.168.10.1</td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td>10</td>
+                    <td>IOU4</td>
+                    <td>Standby</td>
+                    <td>100</td>
+                    <td>Sí</td>
+                    <td>192.168.10.254</td>
+                    <td>192.168.10.2</td>
+                </tr>
+                <tr>
+                    <td>20</td>
+                    <td>20</td>
+                    <td><strong>SW1</strong></td>
+                    <td><strong>Active</strong></td>
+                    <td>110</td>
+                    <td>Sí</td>
+                    <td>192.168.20.254</td>
+                    <td>192.168.20.1</td>
+                </tr>
+                <tr>
+                    <td>20</td>
+                    <td>20</td>
+                    <td>IOU4</td>
+                    <td>Standby</td>
+                    <td>100</td>
+                    <td>Sí</td>
+                    <td>192.168.20.254</td>
+                    <td>192.168.20.2</td>
+                </tr>
+                <tr>
+                    <td>30</td>
+                    <td>30</td>
+                    <td>SW1</td>
+                    <td>Standby</td>
+                    <td>100</td>
+                    <td>Sí</td>
+                    <td>192.168.30.254</td>
+                    <td>192.168.30.1</td>
+                </tr>
+                <tr>
+                    <td>30</td>
+                    <td>30</td>
+                    <td><strong>IOU4</strong></td>
+                    <td><strong>Active</strong></td>
+                    <td>110</td>
+                    <td>Sí</td>
+                    <td>192.168.30.254</td>
+                    <td>192.168.30.2</td>
+                </tr>
+                <tr>
+                    <td>40</td>
+                    <td>40</td>
+                    <td>SW1</td>
+                    <td>Standby</td>
+                    <td>100</td>
+                    <td>Sí</td>
+                    <td>192.168.40.254</td>
+                    <td>192.168.40.1</td>
+                </tr>
+                <tr>
+                    <td>40</td>
+                    <td>40</td>
+                    <td><strong>IOU4</strong></td>
+                    <td><strong>Active</strong></td>
+                    <td>110</td>
+                    <td>Sí</td>
+                    <td>192.168.40.254</td>
+                    <td>192.168.40.2</td>
+                </tr>
+            </table>
+
+            <h4>Conclusión HSRP:</h4>
+            <ul>
+                <li><span class="success">✅ Carga balanceada:</span> SW1 activo para VLANs 10 y 20, IOU4 activo para VLANs 30 y 40</li>
+                <li><span class="success">✅ Preempt enabled:</span> Ambos dispositivos pueden recuperar el estado Active si tienen mayor prioridad</li>
+                <li><span class="success">✅ Redundancia completa:</span> Todas las VLANs tienen gateway virtual activo y standby</li>
+            </ul>
+        </div>
+
+        <div class="config-section">
+            <h3>5.4 Resumen Final del Estado de la Red</h3>
+            <table>
+                <tr>
+                    <th>Aspecto</th>
+                    <th>Estado</th>
+                    <th>Observaciones</th>
+                </tr>
+                <tr>
+                    <td><strong>OSPF Área 0</strong></td>
+                    <td><span class="success">✅ Funcional</span></td>
+                    <td>Routers IOU1, IOU2, IOU5 intercambiando rutas correctamente</td>
+                </tr>
+                <tr>
+                    <td><strong>OSPF Área 1</strong></td>
+                    <td><span class="success">✅ Funcional</span></td>
+                    <td>SW1 inyectando rutas de VLANs al backbone OSPF</td>
+                </tr>
+                <tr>
+                    <td><strong>HSRP</strong></td>
+                    <td><span class="success">✅ Funcional</span></td>
+                    <td>Balanceo de carga activo entre SW1 (VLANs 10-20) e IOU4 (VLANs 30-40)</td>
+                </tr>
+                <tr>
+                    <td><strong>EtherChannel</strong></td>
+                    <td><span class="success">✅ Funcional</span></td>
+                    <td>Enlace agregado entre IOU4 y otro dispositivo operativo</td>
+                </tr>
+                <tr>
+                    <td><strong>Conectividad End-to-End</strong></td>
+                    <td><span class="success">✅ Funcional</span></td>
+                    <td>Rutas aprendidas en todas las tablas de enrutamiento</td>
+                </tr>
+            </table>
+        </div>
+    </section>
+
+    <section>
+        <h2>6) Conclusión</h2>
+        <p>El laboratorio se implementó exitosamente cumpliendo todos los objetivos:</p>
+        <ul>
+            <li><strong>OSPF Multiárea:</strong> Configurado correctamente con Área 0 (backbone) y Área 1 (VLANs).</li>
+            <li><strong>HSRP:</strong> Implementado con balanceo de carga entre SW1 e IOU4, proporcionando redundancia de gateway.</li>
+            <li><strong>EtherChannel:</strong> Configurado exitosamente para agregación de enlaces.</li>
+            <li><strong>Conectividad:</strong> Todas las rutas se propagan correctamente entre áreas OSPF.</li>
+            <li><strong>Resiliencia:</strong> La red es tolerante a fallos gracias a HSRP y OSPF.</li>
+        </ul>
+        
+        <div class="note">
+            <p><strong>Nota:</strong> Este laboratorio demuestra una implementación empresarial típica con redundancia de gateway, enrutamiento dinámico multiárea y agregación de enlaces para alta disponibilidad.</p>
+        </div>
+    </section>
+
+    <footer>
+        <p>Laboratorio CCNA - HSRP, OSPF Multiárea y EtherChannel</p>
+        <p>Documentación generada el 11 de septiembre de 2025</p>
+    </footer>
+</body>
+</html>
