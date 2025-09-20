@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio: Redundancia con VRRP, OSPF, EIGRP y VPN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background-color: #0066a0;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 24px;
+            margin: 25px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #0066a0;
+            color: #0066a0;
+        }
+
+        h3 {
+            font-size: 20px;
+            margin: 20px 0 10px;
+            color: #0066a0;
+        }
+
+        section {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .objective {
+            background-color: #e8f4fc;
+            border-left: 5px solid #0066a0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #0066a0;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+
+        .command {
+            color: #ffcc66;
+        }
+
+        .comment {
+            color: #999;
+            font-style: italic;
+        }
+
+        .config-section {
+            margin-bottom: 25px;
+        }
+
+        .note {
+            background-color: #fff9e6;
+            border-left: 5px solid #ffcc00;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .topology-image {
+            text-align: center;
+            margin: 25px 0;
+        }
+
+        .topology-image img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .caption {
+            font-style: italic;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            h2 {
+                font-size: 20px;
+            }
+
+            section {
+                padding: 15px;
+            }
+
+            pre {
+                font-size: 12px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Laboratorio: Redundancia con VRRP, OSPF, EIGRP y VPN</h1>
+    
+    </header>
+
+    <section class="objective">
+        <h2>1) Descripción General</h2>
+        <p>Este laboratorio implementa una infraestructura de red corporativa con:</p>
+        <ul>
+            <li><strong>Conmutación de capa 2/3</strong> con redundancia mediante VRRP</li>
+            <li><strong>Enrutamiento dinámico</strong> con OSPF y EIGRP</li>
+            <li><strong>Túneles VPN IPSec</strong> site-to-site</li>
+            <li><strong>Agregación de enlaces</strong> mediante EtherChannel (LACP)</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>2) Topología y Dispositivos</h2>
+        <ul>
+            <li><strong>SW1</strong> y <strong>SW2</strong>: Switches de capa 3 con VRRP</li>
+            <li><strong>ROUTER1</strong>: Router principal con terminación VPN</li>
+            <li><strong>ROUTER2</strong>: Router de distribución (OSPF/EIGRP)</li>
+            <li><strong>ROUTER3</strong>: Router remoto con DHCP y VPN</li>
+            <li><strong>VPCs</strong>: Estaciones de trabajo en diferentes VLANs</li>
+        </ul>
+
+        <div class="topology-image">
+            <div style="background-color: #eee; padding: 40px; text-align: center; border-radius: 5px;">
+                <img src="img/ccnp1/vrrp.png" alt="Topología VRRP" style="width:80%;">
+            </div>
+            <p class="caption">Figura 1: Topología de red con VRRP, OSPF, EIGRP y VPN</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>3) Segmentos de Red</h2>
+        <table>
+            <tr>
+                <th>Red</th>
+                <th>Máscara</th>
+                <th>Propósito</th>
+            </tr>
+            <tr>
+                <td>10.0.0.0/30</td>
+                <td>255.255.255.252</td>
+                <td>Enlace R1-R2</td>
+            </tr>
+            <tr>
+                <td>10.0.1.0/30</td>
+                <td>255.255.255.252</td>
+                <td>Enlace R2-R3</td>
+            </tr>
+            <tr>
+                <td>10.10.10.0/30</td>
+                <td>255.255.255.252</td>
+                <td>Enlace R1-SW1</td>
+            </tr>
+            <tr>
+                <td>10.20.20.0/30</td>
+                <td>255.255.255.252</td>
+                <td>Enlace R1-SW2</td>
+            </tr>
+            <tr>
+                <td>192.168.10.0/24</td>
+                <td>255.255.255.0</td>
+                <td>VLAN 10</td>
+            </tr>
+            <tr>
+                <td>192.168.20.0/24</td>
+                <td>255.255.255.0</td>
+                <td>VLAN 20</td>
+            </tr>
+            <tr>
+                <td>172.16.10.0/24</td>
+                <td>255.255.255.0</td>
+                <td>LAN remota (R3)</td>
+            </tr>
+        </table>
+    </section>
+
+    <section>
+        <h2>4) Configuraciones Clave</h2>
+
+        <div class="config-section">
+            <h3>4.1 VRRP (Redundancia)</h3>
+            <p><strong>SW1 (Backup VLAN10, Master VLAN20):</strong></p>
+            <pre><code><span class="command">interface Vlan10</span>
+<span class="command">ip address 192.168.10.1 255.255.255.0</span>
+<span class="command">vrrp 10 description VRRP-VLAN10-Backup</span>
+<span class="command">vrrp 10 ip 192.168.10.254</span>
+
+<span class="command">interface Vlan20</span>
+<span class="command">ip address 192.168.20.1 255.255.255.0</span>
+<span class="command">vrrp 20 description VRRP-VLAN20-Master</span>
+<span class="command">vrrp 20 ip 192.168.20.254</span>
+<span class="command">vrrp 20 priority 150</span></code></pre>
+
+            <p><strong>SW2 (Master VLAN10, Backup VLAN20):</strong></p>
+            <pre><code><span class="command">interface Vlan10</span>
+<span class="command">ip address 192.168.10.2 255.255.255.0</span>
+<span class="command">vrrp 10 description VRRP_VLAN10_MASTER</span>
+<span class="command">vrrp 10 ip 192.168.10.254</span>
+<span class="command">vrrp 10 priority 150</span>
+
+<span class="command">interface Vlan20</span>
+<span class="command">ip address 192.168.20.2 255.255.255.0</span>
+<span class="command">vrrp 20 description VRRP_VLAN20_BACKUP</span>
+<span class="command">vrrp 20 ip 192.168.20.254</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>4.2 EtherChannel (Agregación de Enlaces)</h3>
+            <pre><code><span class="command">interface Port-channel1</span>
+<span class="command">switchport trunk encapsulation dot1q</span>
+<span class="command">switchport mode trunk</span>
+
+<span class="command">interface Ethernet2/0</span>
+<span class="command">switchport trunk encapsulation dot1q</span>
+<span class="command">switchport mode trunk</span>
+<span class="command">channel-group 1 mode active</span>
+
+<span class="command">interface Ethernet2/1</span>
+<span class="command">switchport trunk encapsulation dot1q</span>
+<span class="command">switchport mode trunk</span>
+<span class="command">channel-group 1 mode active</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>4.3 OSPF</h3>
+            <pre><code><span class="command">router ospf 1</span>
+<span class="command">network 10.10.10.0 0.0.0.3 area 0</span>
+<span class="command">network 192.168.10.0 0.0.0.255 area 0</span>
+<span class="command">network 192.168.20.0 0.0.0.255 area 0</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>4.4 Redistribución OSPF/EIGRP en R2</h3>
+            <pre><code><span class="command">router eigrp 1</span>
+<span class="command">network 10.0.1.0 0.0.0.3</span>
+<span class="command">redistribute ospf 1 metric 10000 100 255 1 1500</span>
+
+<span class="command">router ospf 1</span>
+<span class="command">redistribute eigrp 1 subnets</span>
+<span class="command">network 10.0.0.0 0.0.0.3 area 0</span></code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>4.5 VPN IPSec</h3>
+            <p><strong>ACL de tráfico interesante (R1):</strong></p>
+            <pre><code><span class="command">ip access-list extended VPN-TRAFFIC</span>
+<span class="command">permit ip 192.168.10.0 0.0.0.255 172.16.10.0 0.0.0.255</span>
+<span class="command">permit ip 192.168.20.0 0.0.0.255 172.16.10.0 0.0.0.255</span></code></pre>
+
+            <p><strong>Configuración de VPN en R1:</strong></p>
+            <pre><code><span class="command">crypto isakmp policy 10</span>
+<span class="command">encryption aes 256</span>
+<span class="command">authentication pre-share</span>
+<span class="command">group 5</span>
+<span class="command">crypto isakmp key vpnpa66 address 10.0.1.2</span>
+
+<span class="command">crypto ipsec transform-set VPN-SET esp-aes esp-sha-hmac</span>
+<span class="command">crypto map VPN-MAP 10 ipsec-isakmp</span>
+<span class="command">set peer 10.0.1.2</span>
+<span class="command">set transform-set VPN-SET</span>
+<span class="command">match address VPN-TRAFFIC</span>
+
+<span class="command">interface eth0/0</span>
+<span class="command">crypto map VPN-MAP</span></code></pre>
+
+            <p><strong>Configuración de VPN en R3:</strong></p>
+            <pre><code><span class="command">ip access-list extended VPN-TRAFFIC</span>
+<span class="command">permit ip 172.16.10.0 0.0.0.255 192.168.10.0 0.0.0.255</span>
+<span class="command">permit ip 172.16.10.0 0.0.0.255 192.168.20.0 0.0.0.255</span>
+
+<span class="command">crypto isakmp policy 10</span>
+<span class="command">encryption aes 256</span>
+<span class="command">authentication pre-share</span>
+<span class="command">group 5</span>
+<span class="command">crypto isakmp key vpnpa66 address 10.0.0.2</span>
+
+<span class="command">crypto ipsec transform-set VPN-SET esp-aes esp-sha-hmac</span>
+<span class="command">crypto map VPN-MAP 10 ipsec-isakmp</span>
+<span class="command">set peer 10.0.0.2</span>
+<span class="command">set transform-set VPN-SET</span>
+<span class="command">match address VPN-TRAFFIC</span>
+
+<span class="command">interface eth 0/1</span>
+<span class="command">crypto map VPN-MAP</span></code></pre>
+        </div>
+    </section>
+
+    <section>
+        <h2>5) Verificaciones</h2>
+
+        <div class="config-section">
+            <h3>5.1 VRRP</h3>
+            <pre><code>SW1# show vrrp brief
+Interface Grp Pri Time Own Pre State Master addr Group addr
+Vl10 10 100 3609 Y Backup 192.168.10.2 192.168.10.254
+Vl20 20 150 3414 Y Master 192.168.20.1 192.168.20.254
+
+SW2# show vrrp brief
+Interface Grp Pri Time Own Pre State Master addr Group addr
+Vl10 10 150 3414 Y Master 192.168.10.2 192.168.10.254
+Vl20 20 100 3609 Y Backup 192.168.20.1 192.168.20.254</code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>5.2 EtherChannel</h3>
+            <pre><code>SW1# show etherchannel summary
+Group Port-channel Protocol Ports
+------+-------------+----------+-------------------------
+1 Po1(SU) LACP Et2/0(P) Et2/1(P)</code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>5.3 VPN IPSec</h3>
+            <pre><code>ROUTER1# show crypto ipsec sa
+- 2 Security Associations establecidas (una por cada VLAN)
+- SPI values activos: 0xC4F8CFF, 0x25B2BE8F
+- Tráfico encapsulado/encryptado: 8-9 paquetes
+- Modo: Tunnel
+- Transform sets: esp-aes esp-sha-hmac
+
+ROUTER3# show crypto ipsec sa
+- SAs espejo correctamente establecidas
+- Tráfico bidireccional funcionando</code></pre>
+        </div>
+
+        <div class="config-section">
+            <h3>5.4 Conectividad</h3>
+            <pre><code>Desde PC2 (Pruebas de Ping):
+ping 192.168.20.254  # Gateway VRRP - OK
+ping 192.168.10.254  # Gateway VRRP alterno - OK</code></pre>
+        </div>
+    </section>
+    <section>
+
+<section>
+  <h2>6) Verificación Completa de VPN IPSec</h2>
+
+  <div class="config-section">
+    <h3>6.1 ROUTER1 – VPN Establecida</h3>
+    <pre><code>ROUTER1# show crypto ipsec sa
+
+interface: Ethernet0/0
+    Crypto map tag: VPN-MAP, local addr 10.0.0.2
+
+   protected vrf: (none)
+   local  ident (addr/mask/prot/port): (192.168.20.0/255.255.255.0/0/0)
+   remote ident (addr/mask/prot/port): (172.16.10.0/255.255.255.0/0/0)
+   current_peer 10.0.1.2 port 500
+     PERMIT, flags={origin_is_acl,}
+    #pkts encaps: 8, #pkts encrypt: 8, #pkts digest: 8
+    #pkts decaps: 9, #pkts decrypt: 9, #pkts verify: 9
+    #pkts compressed: 0, #pkts decompressed: 0
+    #pkts not compressed: 0, #pkts compr. failed: 0
+    #pkts not decompressed: 0, #pkts decompress failed: 0
+    #send errors 0, #recv errors 0
+
+     local crypto endpt.: 10.0.0.2, remote crypto endpt.: 10.0.1.2
+     plaintext mtu 1438, path mtu 1500, ip mtu 1500, ip mtu idb Ethernet0/0
+     current outbound spi: 0xC4F8CFF(206540031)
+     PFS (Y/N): N, DH group: none
+
+     inbound esp sas:
+      spi: 0x896AE75F(2305484639)
+        transform: esp-aes esp-sha-hmac ,
+        in use settings ={Tunnel, }
+        conn id: 1, flow_id: SW:1, sibling_flags 80000040, crypto map: VPN-MAP
+        sa timing: remaining key lifetime (k/sec): (4283696/3552)
+        IV size: 16 bytes
+        replay detection support: Y
+        ecn bit support: Y status: off
+        Status: ACTIVE(ACTIVE)
+
+     outbound esp sas:
+      spi: 0xC4F8CFF(206540031)
+        transform: esp-aes esp-sha-hmac ,
+        in use settings ={Tunnel, }
+        conn id: 2, flow_id: SW:2, sibling_flags 80000040, crypto map: VPN-MAP
+        sa timing: remaining key lifetime (k/sec): (4283696/3552)
+        IV size: 16 bytes
+        replay detection support: Y
+        ecn bit support: Y status: off
+        Status: ACTIVE(ACTIVE)</code></pre>
+  </div>
+
+  <div class="config-section">
+    <h3>6.2 ROUTER3 – VPN Establecida</h3>
+    <pre><code>ROUTER3# show crypto ipsec sa
+
+interface: Ethernet0/1
+    Crypto map tag: VPN-MAP, local addr 10.0.1.2
+
+   protected vrf: (none)
+   local  ident (addr/mask/prot/port): (172.16.10.0/255.255.255.0/0/0)
+   remote ident (addr/mask/prot/port): (192.168.20.0/255.255.255.0/0/0)
+   current_peer 10.0.0.2 port 500
+     PERMIT, flags={origin_is_acl,}
+    #pkts encaps: 9, #pkts encrypt: 9, #pkts digest: 9
+    #pkts decaps: 8, #pkts decrypt: 8, #pkts verify: 8
+    #pkts compressed: 0, #pkts decompressed: 0
+    #pkts not compressed: 0, #pkts compr. failed: 0
+    #pkts not decompressed: 0, #pkts decompress failed: 0
+    #send errors 0, #recv errors 0
+
+     local crypto endpt.: 10.0.1.2, remote crypto endpt.: 10.0.0.2
+     plaintext mtu 1438, path mtu 1500, ip mtu 1500, ip mtu idb Ethernet0/1
+     current outbound spi: 0x896AE75F(2305484639)
+     PFS (Y/N): N, DH group: none
+
+     inbound esp sas:
+      spi: 0xC4F8CFF(206540031)
+        transform: esp-aes esp-sha-hmac ,
+        in use settings ={Tunnel, }
+        conn id: 1, flow_id: SW:1, sibling_flags 80004040, crypto map: VPN-MAP
+        sa timing: remaining key lifetime (k/sec): (4321228/3513)
+        IV size: 16 bytes
+        replay detection support: Y
+        ecn bit support: Y status: off
+        Status: ACTIVE(ACTIVE)
+
+     outbound esp sas:
+      spi: 0x896AE75F(2305484639)
+        transform: esp-aes esp-sha-hmac ,
+        in use settings ={Tunnel, }
+        conn id: 2, flow_id: SW:2, sibling_flags 80004040, crypto map: VPN-MAP
+        sa timing: remaining key lifetime (k/sec): (4321228/3513)
+        IV size: 16 bytes
+        replay detection support: Y
+        ecn bit support: Y status: off
+        Status: ACTIVE(ACTIVE)</code></pre>
+  </div>
+</section>
+
+
+
+<section>
+  <h2>7) Tablas de Enrutamiento Completas</h2>
+
+  <div class="config-section">
+    <h3>7.1 ROUTER2 – Tabla de Enrutamiento</h3>
+    <pre><code>ROUTER2# show ip route
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override
+
+Gateway of last resort is not set
+
+      10.0.0.0/8 is variably subnetted, 6 subnets, 2 masks
+C        10.0.0.0/30 is directly connected, Ethernet0/0
+L        10.0.0.1/32 is directly connected, Ethernet0/0
+C        10.0.1.0/30 is directly connected, Ethernet0/1
+L        10.0.1.1/32 is directly connected, Ethernet0/1
+O        10.10.10.0/30 [110/20] via 10.0.0.2, 01:02:48, Ethernet0/0
+O        10.20.20.0/30 [110/20] via 10.0.0.2, 00:55:34, Ethernet0/0
+      172.16.0.0/24 is subnetted, 1 subnets
+D        172.16.10.0 [90/307200] via 10.0.1.2, 01:02:56, Ethernet0/1
+O     192.168.10.0/24 [110/21] via 10.0.0.2, 00:40:41, Ethernet0/0
+O     192.168.20.0/24 [110/21] via 10.0.0.2, 00:40:31, Ethernet0/0</code></pre>
+  </div>
+</section>
+
+<div class="config-section">
+    <h3>7.2 SW1 – Tabla de Enrutamiento</h3>
+    <pre><code>SW1# show ip route
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route, H - NHRP, l - LISP
+       a - application route
+       + - replicated route, % - next hop override
+
+Gateway of last resort is not set
+
+      10.0.0.0/8 is variably subnetted, 5 subnets, 2 masks
+O        10.0.0.0/30 [110/20] via 10.10.10.2, 00:32:58, Ethernet0/0
+O E2     10.0.1.0/30 [110/20] via 10.10.10.2, 00:30:32, Ethernet0/0
+C        10.10.10.0/30 is directly connected, Ethernet0/0
+L        10.10.10.1/32 is directly connected, Ethernet0/0
+O        10.20.20.0/30 [110/11] via 192.168.20.2, 00:08:24, Vlan20
+                      [110/11] via 192.168.10.2, 00:08:34, Vlan10
+
+      172.16.0.0/24 is subnetted, 1 subnets
+O E2     172.16.10.0 [110/20] via 10.10.10.2, 00:30:32, Ethernet0/0
+
+      192.168.10.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.10.0/24 is directly connected, Vlan10
+L        192.168.10.1/32 is directly connected, Vlan10
+
+      192.168.20.0/24 is variably subnetted, 2 subnets, 2 masks
+C        192.168.20.0/24 is directly connected, Vlan20
+L        192.168.20.1/32 is directly connected, Vlan20</code></pre>
+  </div>
+
+
+    <footer>
+        <p></p>
+    </footer>
+
+</body>
+</html>
