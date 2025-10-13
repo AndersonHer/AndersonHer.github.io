@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio: Automatización con Netmiko</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background-color: #0066a0;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        h2 {
+            font-size: 24px;
+            margin: 25px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #0066a0;
+            color: #0066a0;
+        }
+        
+        h3 {
+            font-size: 20px;
+            margin: 20px 0 10px;
+            color: #0066a0;
+        }
+        
+        section {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .objective {
+            background-color: #e8f4fc;
+            border-left: 5px solid #0066a0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #0066a0;
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        
+        .command {
+            color: #ffcc66;
+        }
+        
+        .comment {
+            color: #999;
+            font-style: italic;
+        }
+        
+        .config-section {
+            margin-bottom: 25px;
+        }
+        
+        .note {
+            background-color: #fff9e6;
+            border-left: 5px solid #ffcc00;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .topology-image {
+            text-align: center;
+            margin: 25px 0;
+        }
+        
+        .topology-image img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .caption {
+            font-style: italic;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            h2 {
+                font-size: 20px;
+            }
+            
+            section {
+                padding: 15px;
+            }
+            
+            pre {
+                font-size: 12px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Laboratorio: Automatización de Configuración de Dispositivos de Red</h1>
+        <p>Documentación completa del laboratorio de automatización con Netmiko</p>
+    </header>
+
+    <section class="objective">
+        <h2>1) Objetivo del Laboratorio</h2>
+        <p>Automatizar la configuración básica de múltiples dispositivos de red (routers y switches Cisco) utilizando Netmiko, una biblioteca de Python para interactuar con dispositivos de red via SSH y Telnet.</p>
+    </section>
+
+    <section>
+        <h2>2) Topología</h2>
+        <p>La topología incluye los siguientes dispositivos:</p>
+        <ul>
+            <li><strong>R1</strong>: Router Cisco (conexión SSH)</li>
+            <li><strong>SW1, SW2, SW3</strong>: Switches Cisco (conexión Telnet)</li>
+        </ul>
+        <p>Todos los dispositivos están en la red 192.168.56.0/24.</p>
+        
+        <div class="topology-image">
+            <div style="background-color: #eee; padding: 40px; text-align: center; border-radius: 5px;">
+                <img src="img/ccnp1/atm1.png" alt="Topología de red" style="width:80%;">
+            </div>
+            <p class="caption">Figura 1: Topología de red con dispositivos Cisco</p>
+        </div>
+    </section>
+
+    <section>
+        <h2>3) Script de Automatización (provisionamiento.py)</h2>
+        
+        <div class="topology-image">
+            <div style="background-color: #eee; padding: 40px; text-align: center; border-radius: 5px;">
+                <img src="img/ccnp1/atm1.1.png" alt="Código Python" style="width:80%;">
+            </div>
+            <p class="caption">Figura 2: Captura del script de automatización</p>
+        </div>
+        
+        <div class="config-section">
+            <h3>Código completo del script:</h3>
+            <pre><code><span class="command">from netmiko import ConnectHandler</span>
+
+<span class="comment"># Lista de dispositivos</span>
+<span class="command">devices = [</span>
+    <span class="comment"># Router con SSH</span>
+    <span class="command">{</span>
+        <span class="command">"device_type": "cisco_ios",</span>
+        <span class="command">"ip": "192.168.56.101",</span>
+        <span class="command">"username": "cisco",</span>
+        <span class="command">"password": "cisco",</span>
+        <span class="command">"display_name": "R1"</span>
+    <span class="command">},</span>
+
+    <span class="comment"># Switches con Telnet</span>
+    <span class="command">{</span>
+        <span class="command">"device_type": "cisco_ios_telnet",</span>
+        <span class="command">"ip": "192.168.56.102",</span>
+        <span class="command">"port": 23,</span>
+        <span class="command">"username": "ciscoSW1",</span>
+        <span class="command">"password": "cisco",</span>
+        <span class="command">"secret": "cisco",</span>
+        <span class="command">"display_name": "SW1"</span>
+    <span class="command">},</span>
+    <span class="command">{</span>
+        <span class="command">"device_type": "cisco_ios_telnet",</span>
+        <span class="command">"ip": "192.168.56.103",</span>
+        <span class="command">"port": 23,</span>
+        <span class="command">"username": "ciscoSW2",</span>
+        <span class="command">"password": "cisco",</span>
+        <span class="command">"secret": "cisco",</span>
+        <span class="command">"display_name": "SW2"</span>
+    <span class="command">},</span>
+    <span class="command">{</span>
+        <span class="command">"device_type": "cisco_ios_telnet",</span>
+        <span class="command">"ip": "192.168.56.104",</span>
+        <span class="command">"port": 23,</span>
+        <span class="command">"username": "ciscoSW3",</span>
+        <span class="command">"password": "cisco",</span>
+        <span class="command">"secret": "cisco",</span>
+        <span class="command">"display_name": "SW3"</span>
+    <span class="command">}</span>
+<span class="command">]</span>
+
+<span class="comment"># Configuraciones aplicadas</span>
+<span class="command">common_config = [</span>
+    <span class="command">"username admin privilege 15 secret cisco123",</span>
+    <span class="command">"enable secret cisco123",</span>
+    <span class="command">"banner motd ^C---No autorizado--- ingrese con credenciales validas---^C",</span>
+    <span class="command">"logging console"</span>
+<span class="command">]</span>
+
+<span class="comment"># Manejo de errores</span>
+<span class="command">for device in devices:</span>
+    <span class="command">try:</span>
+        <span class="command">print(f"\nConectando a {device['display_name']} ({device['ip']})...")</span>
+        <span class="command">connection = ConnectHandler(**{k: v for k, v in device.items() if k != "display_name"})</span>
+        <span class="command">connection.enable()</span>
+        
+        <span class="command">config_commands = [f"hostname {device['display_name']}"] + common_config</span>
+        <span class="command">connection.send_config_set(config_commands)</span>
+        
+        <span class="command">output = connection.send_command("show running-config | include hostname")</span>
+        <span class="command">print(f"Configuración aplicada en {device['display_name']}: {output}")</span>
+        
+        <span class="command">connection.disconnect()</span>
+        
+    <span class="command">except Exception as e:</span>
+        <span class="command">print(f"Error con {device['display_name']}: {str(e)}")</span></code></pre>
+        </div>
+    </section>
+
+    <section>
+        <h2>4) Ejecución del Script</h2>
+        
+        <div class="topology-image">
+            <div style="background-color: #eee; padding: 40px; text-align: center; border-radius: 5px;">
+                <img src="img/ccnp1/atm1.2.png" alt="Ejecución del script" style="width:80%;">
+            </div>
+            <p class="caption">Figura 3: Salida de la ejecución del script</p>
+        </div>
+        
+        <div class="config-section">
+            <h3>Comandos de ejecución:</h3>
+            <pre><code><span class="command">root@NetworkAutomation-1:/home# python3 provisionamiento.py</span></code></pre>
+        </div>
+    </section>
+
+    <section>
+        <h2>5) Comprobación</h2>
+        
+        <div class="config-section">
+            <h3>Verificación de configuración aplicada:</h3>
+            <pre><code><span class="command">username cisco privilege 15 secret 5 $1$UwWv$4wpuVaHRYT8znapP6mlxx0</span>
+<span class="command">username admin privilege 15 secret 5 $1$RryO$Q/VFfn6D./fxHVv0bkwZU0</span></code></pre>
+        </div>
+    </section>
+
+    <section>
+        <h2>6) Conclusión</h2>
+        <p>El laboratorio demostró la automatización de configuraciones básicas en dispositivos Cisco usando Netmiko, reduciendo el tiempo y errores asociados con la configuración manual. La herramienta es escalable y puede adaptarse para tareas más complejas.</p>
+    </section>
+
+    <footer>
+        <p>Documentación de Laboratorio de Automatización con Netmiko</p>
+    </footer>
+</body>
+</html>

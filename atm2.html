@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio: Automatización de Configuración de VLANs en Switches Cisco</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background-color: #0066a0;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        h2 {
+            font-size: 24px;
+            margin: 25px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #0066a0;
+            color: #0066a0;
+        }
+        
+        h3 {
+            font-size: 20px;
+            margin: 20px 0 10px;
+            color: #0066a0;
+        }
+        
+        section {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .objective {
+            background-color: #e8f4fc;
+            border-left: 5px solid #0066a0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #0066a0;
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+        
+        .command {
+            color: #ffcc66;
+        }
+        
+        .comment {
+            color: #999;
+            font-style: italic;
+        }
+        
+        .config-section {
+            margin-bottom: 25px;
+        }
+        
+        .note {
+            background-color: #fff9e6;
+            border-left: 5px solid #ffcc00;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .topology-image {
+            text-align: center;
+            margin: 25px 0;
+        }
+        
+        .topology-image img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .caption {
+            font-style: italic;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            h2 {
+                font-size: 20px;
+            }
+            
+            section {
+                padding: 15px;
+            }
+            
+            pre {
+                font-size: 12px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Laboratorio: Automatización de Configuración de VLANs en Switches Cisco</h1>
+        <p>Documentación completa del laboratorio de automatización con Python y Netmiko</p>
+    </header>
+
+    <section class="objective">
+        <h2>1. Descripción General del Proyecto</h2>
+        <p>Este laboratorio implementa un sistema completo de automatización de red para la configuración masiva de switches Cisco. El proyecto demuestra cómo utilizar Python junto con la biblioteca Netmiko para gestionar dispositivos de red de manera programática, eliminando la necesidad de configuración manual repetitiva y reduciendo errores humanos.</p>
+    </section>
+
+    <section>
+        <h2>2. Arquitectura del Sistema</h2>
+        
+        <h3>2.1. Topología de Red</h3>
+        <ul>
+            <li><strong>3 switches Cisco</strong> conectados en la misma red</li>
+            <li><strong>Rango IP</strong>: 192.168.56.102 - 192.168.56.104</li>
+            <li><strong>Protocolo</strong>: Telnet para gestión remota</li>
+            <li><strong>Autenticación</strong>: Usuario y contraseña + secreto de enable</li>
+        </ul>
+        
+        <div class="topology-image">
+            <div style="background-color: #eee; padding: 40px; text-align: center; border-radius: 5px;">
+                <img src="img/ccnp1/atm2.png" alt="Topología de red" style="width:80%;">
+            </div>
+            <p class="caption">Figura 1: Topología de red con 3 switches Cisco</p>
+        </div>
+        
+        <h3>2.2. Estructura de VLANs Implementada</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>VLAN ID</th>
+                    <th>Nombre VLAN</th>
+                    <th>Propósito</th>
+                    <th>Puertos Asignados</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>10</td>
+                    <td>VLAN10_Usuarios</td>
+                    <td>Tráfico de usuarios</td>
+                    <td>Ethernet 1/0-2</td>
+                </tr>
+                <tr>
+                    <td>20</td>
+                    <td>VLAN20_Servidores</td>
+                    <td>Servidores corporativos</td>
+                    <td>Ethernet 2/0-2</td>
+                </tr>
+                <tr>
+                    <td>30</td>
+                    <td>VLAN30_Gestion</td>
+                    <td>Gestión de red</td>
+                    <td>Ethernet 3/0-1</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>3. Script Completo de Automatización</h2>
+        
+        <div class="config-section">
+            <h3>Código Python:</h3>
+            <pre><code><span class="command">from netmiko import ConnectHandler</span>
+
+<span class="comment"># Lista de switches a configurar</span>
+<span class="command">devices = [</span>
+    <span class="command">{</span>
+        <span class="command">"device_type": "cisco_ios_telnet",</span>
+        <span class="command">"ip": "192.168.56.102",</span>
+        <span class="command">"username": "ciscoSW1",</span>
+        <span class="command">"password": "cisco",</span>
+        <span class="command">"secret": "cisco",</span>
+        <span class="command">"display_name": "SW1"</span>
+    <span class="command">},</span>
+    <span class="command">{</span>
+        <span class="command">"device_type": "cisco_ios_telnet",</span>
+        <span class="command">"ip": "192.168.56.103",</span>
+        <span class="command">"username": "ciscoSW2",</span>
+        <span class="command">"password": "cisco",</span>
+        <span class="command">"secret": "cisco",</span>
+        <span class="command">"display_name": "SW2"</span>
+    <span class="command">},</span>
+    <span class="command">{</span>
+        <span class="command">"device_type": "cisco_ios_telnet",</span>
+        <span class="command">"ip": "192.168.56.104",</span>
+        <span class="command">"username": "ciscoSW3",</span>
+        <span class="command">"password": "cisco",</span>
+        <span class="command">"secret": "cisco",</span>
+        <span class="command">"display_name": "SW3"</span>
+    <span class="command">}</span>
+<span class="command">]</span>
+
+<span class="comment"># Configuración de VLANs y puertos</span>
+<span class="command">vlans = [</span>
+    <span class="command">{"id": "10", "name": "VLAN10_Usuarios"},</span>
+    <span class="command">{"id": "20", "name": "VLAN20_Servidores"},</span>
+    <span class="command">{"id": "30", "name": "VLAN30_Gestion"}</span>
+<span class="command">]</span>
+
+<span class="command">port_assignment = {</span>
+    <span class="command">"10": ["Ethernet 1/0-2"],</span>
+    <span class="command">"20": ["Ethernet 2/0-2"],</span>
+    <span class="command">"30": ["Ethernet 3/0-1"]</span>
+<span class="command">}</span>
+
+<span class="command">def configure_switch(device):</span>
+    <span class="command">"""</span>
+    <span class="command">Función principal para configurar un switch individual</span>
+    <span class="command">"""</span>
+    <span class="command">try:</span>
+        <span class="command">print(f"\\nConectando a {device['display_name']} ({device['ip']})...")</span>
+        
+        <span class="comment"># Establecer conexión con el dispositivo</span>
+        <span class="command">conn = ConnectHandler(**{k: v for k, v in device.items() if k != "display_name"})</span>
+        <span class="command">conn.enable()</span>
+        
+        <span class="comment"># Configurar hostname del switch</span>
+        <span class="command">conn.send_config_set([f"hostname {device['display_name']}"])</span>
+        
+        <span class="comment"># Crear VLANs</span>
+        <span class="command">vlan_cmds = []</span>
+        <span class="command">for vlan in vlans:</span>
+            <span class="command">vlan_cmds += [f"vlan {vlan['id']}", f"name {vlan['name']}", "exit"]</span>
+        <span class="command">conn.send_config_set(vlan_cmds)</span>
+        
+        <span class="comment"># Configurar puertos y asignar VLANs</span>
+        <span class="command">port_cmds = []</span>
+        <span class="command">for vlan_id, ports in port_assignment.items():</span>
+            <span class="command">for port_range in ports:</span>
+                <span class="command">port_cmds += [</span>
+                    <span class="command">f"interface range {port_range}",</span>
+                    <span class="command">"switchport mode access",</span>
+                    <span class="command">f"switchport access vlan {vlan_id}",</span>
+                    <span class="command">"exit"</span>
+                <span class="command">]</span>
+        <span class="command">conn.send_config_set(port_cmds)</span>
+        
+        <span class="comment"># Guardar configuración permanentemente</span>
+        <span class="command">conn.send_command("write memory")</span>
+        
+        <span class="comment"># Verificar configuración aplicada</span>
+        <span class="command">vlan_output = conn.send_command("show vlan brief")</span>
+        <span class="command">port_output = conn.send_command("show interfaces switchport")</span>
+        
+        <span class="comment"># Mostrar resultados en consola</span>
+        <span class="command">print("\\n--- VLANs ---")</span>
+        <span class="command">print(vlan_output)</span>
+        <span class="command">print("\\n--- Puertos ---")</span>
+        <span class="command">print(port_output)</span>
+        
+        <span class="comment"># Guardar logs en archivo</span>
+        <span class="command">with open(f"{device['display_name']}_config.log", "w") as f:</span>
+            <span class="command">f.write(vlan_output + "\\n\\n" + port_output)</span>
+        
+        <span class="comment"># Cerrar conexión</span>
+        <span class="command">conn.disconnect()</span>
+        <span class="command">print(f"✓ {device['display_name']} configurado correctamente")</span>
+        
+    <span class="command">except Exception as e:</span>
+        <span class="command">print(f"✗ Error en {device['display_name']}: {e}")</span>
+
+<span class="comment"># Ejecución principal</span>
+<span class="command">if __name__ == "__main__":</span>
+    <span class="command">for dev in devices:</span>
+        <span class="command">configure_switch(dev)</span></code></pre>
+        </div>
+    </section>
+
+    <section>
+        <h2>4. Flujo Detallado de Ejecución</h2>
+        
+        <h3>4.1. Fase de Inicialización</h3>
+        <ol>
+            <li><strong>Importación de bibliotecas</strong>: Netmiko para comunicación con dispositivos</li>
+            <li><strong>Definición de dispositivos</strong>: Parámetros de conexión para cada switch</li>
+            <li><strong>Configuración de VLANs</strong>: Estructura de datos con IDs y nombres</li>
+            <li><strong>Asignación de puertos</strong>: Mapeo entre VLANs y interfaces físicas</li>
+        </ol>
+        
+        <h3>4.2. Fase de Conexión</h3>
+        <pre><code><span class="comment"># Establecimiento de conexión Telnet</span>
+<span class="command">conn = ConnectHandler(**{k: v for k, v in device.items() if k != "display_name"})</span>
+<span class="command">conn.enable()  # Elevar privilegios a modo enable</span></code></pre>
+        
+        <h3>4.3. Fase de Configuración</h3>
+        <ul>
+            <li><strong>Hostname</strong>: Personalización del nombre del dispositivo</li>
+            <li><strong>Creación de VLANs</strong>: Ejecución secuencial de comandos VLAN</li>
+            <li><strong>Configuración de puertos</strong>: Modo acceso y asignación VLAN</li>
+        </ul>
+        
+        <h3>4.4. Fase de Verificación y Guardado</h3>
+        <ul>
+            <li><strong>Guardado permanente</strong>: write memory</li>
+            <li><strong>Validación</strong>: Comandos show vlan brief y show interfaces switchport</li>
+            <li><strong>Logging</strong>: Generación de archivos de registro por dispositivo</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>5. Resultados de la Ejecución</h2>
+        
+        <h3>5.1. Salida en Consola</h3>
+        <pre><code><span class="command">Conectando a SW1 (192.168.56.102)...</span>
+
+<span class="command">--- VLANs ---</span>
+<span class="command">VLAN Name                             Status    Ports</span>
+<span class="command">---- -------------------------------- --------- -------------------------------</span>
+<span class="command">1    default                          active    Et0/0, Et0/1, Et0/2, Et0/3, Et1/3, Et2/3, Et3/2, Et3/3</span>
+<span class="command">10   VLAN10_Usuarios                  active    Et1/0, Et1/1, Et1/2</span>
+<span class="command">20   VLAN20_Servidores                active    Et2/0, Et2/1, Et2/2</span>
+<span class="command">30   VLAN30_Gestion                   active    Et3/0, Et3/1</span>
+<span class="command">1002 fddi-default                     act/unsup</span>
+<span class="command">1003 token-ring-default               act/unsup</span>
+<span class="command">1004 fddinet-default                  act/unsup</span>
+<span class="command">1005 trnet-default                    act/unsup</span>
+
+<span class="command">--- Puertos ---</span>
+<span class="command">[Detalle completo de configuración de cada puerto]</span>
+<span class="command">✓ SW1 configurado correctamente</span></code></pre>
+        
+        <h3>5.2. Archivos Generados</h3>
+        <ul>
+            <li><strong>SW1_config.log</strong>: Configuración completa del switch 1</li>
+            <li><strong>SW2_config.log</strong>: Configuración completa del switch 2</li>
+            <li><strong>SW3_config.log</strong>: Configuración completa del switch 3</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>6. Análisis de Configuración Aplicada</h2>
+        
+        <h3>6.1. Verificación de VLANs</h3>
+        <p>Las VLANs fueron creadas exitosamente en los tres switches:</p>
+        <ul>
+            <li><strong>VLAN 10</strong>: Usuarios → Puertos Ethernet 1/0-2</li>
+            <li><strong>VLAN 20</strong>: Servidores → Puertos Ethernet 2/0-2</li>
+            <li><strong>VLAN 30</strong>: Gestión → Puertos Ethernet 3/0-1</li>
+        </ul>
+        
+        <h3>6.2. Estado de Puertos</h3>
+        <p>Todos los puertos asignados muestran:</p>
+        <ul>
+            <li><strong>Modo administrativo</strong>: static access</li>
+            <li><strong>Modo operacional</strong>: static access</li>
+            <li><strong>VLAN de acceso</strong>: Configurada correctamente</li>
+            <li><strong>Negociación de trunking</strong>: Desactivada (Off)</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>7. Ventajas de la Automatización Implementada</h2>
+        
+        <h3>7.1. Eficiencia</h3>
+        <ul>
+            <li><strong>Tiempo reducido</strong>: Configuración simultánea de múltiples dispositivos</li>
+            <li><strong>Consistencia</strong>: Misma configuración aplicada en todos los switches</li>
+            <li><strong>Escalabilidad</strong>: Fácil adición de nuevos dispositivos</li>
+        </ul>
+        
+        <h3>7.2. Confiabilidad</h3>
+        <ul>
+            <li><strong>Menos errores</strong>: Eliminación de errores de tipeo manual</li>
+            <li><strong>Verificación automática</strong>: Validación inmediata de configuración</li>
+            <li><strong>Logs detallados</strong>: Registro completo de cambios aplicados</li>
+        </ul>
+        
+        <h3>7.3. Mantenibilidad</h3>
+        <ul>
+            <li><strong>Código reutilizable</strong>: Base para futuras automatizaciones</li>
+            <li><strong>Fácil modificación</strong>: Cambios centralizados en estructuras de datos</li>
+            <li><strong>Documentación automática</strong>: Logs generados como evidencia</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>8. Conclusión del Laboratorio</h2>
+        <p>El laboratorio demostró exitosamente la capacidad de automatizar configuraciones de red complejas utilizando Python y Netmiko. La solución implementada:</p>
+        <ul>
+            <li>✅ <strong>Configuró 3 switches simultáneamente</strong></li>
+            <li>✅ <strong>Creó y asignó VLANs automáticamente</strong></li>
+            <li>✅ <strong>Validó la configuración aplicada</strong></li>
+            <li>✅ <strong>Generó documentación de respaldo</strong></li>
+            <li>✅ <strong>Estableció una base escalable para futuros proyectos</strong></li>
+        </ul>
+    </section>
+
+    <footer>
+        <p>Documentación de Laboratorio de Automatización de VLANs con Python y Netmiko</p>
+    </footer>
+</body>
+</html>
