@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laboratorio: Servidor Web Apache con Virtual Hosts</title>
+    <title>Laboratorio: Servidor Web Apache</title>
     <style>
         * {
             margin: 0;
@@ -140,14 +140,6 @@
             border-radius: 4px;
         }
         
-        .warning {
-            background-color: #fdf2f0;
-            border-left: 5px solid #d44413;
-            padding: 18px;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-        
         .topology-image {
             text-align: center;
             margin: 30px 0;
@@ -241,23 +233,6 @@
             color: #721c24;
         }
         
-        .lab-info {
-            background: linear-gradient(135deg, #e8f4fc 0%, #d4e8f7 100%);
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border-left: 5px solid #0066a0;
-        }
-        
-        .image-placeholder {
-            background-color: #eef5fd;
-            padding: 40px;
-            text-align: center;
-            border-radius: 8px;
-            margin: 20px 0;
-            border: 2px dashed #0066a0;
-        }
-        
         @media (max-width: 768px) {
             body {
                 padding: 15px;
@@ -288,7 +263,7 @@
 </head>
 <body>
     <header>
-        <h1>LABORATORIO SERVIDOR WEB APACHE</h1>
+        <h1>LABORATORIO: SERVIDOR WEB APACHE</h1>
         <p class="subtitle">Configuración de Virtual Hosts, Logs Separados y Rotación de Logs</p>
     </header>
 
@@ -297,176 +272,94 @@
         <p>Configurar un servidor web Apache que sirva <strong>dos sitios distintos</strong> utilizando Virtual Hosts, registrar sus logs de manera separada y asegurar la rotación automática de los mismos para mantener un entorno profesional y seguro.</p>
     </section>
 
-    <div class="lab-info">
-        <h4>Servidor Web Apache con Virtual Hosts</h4>
-        <p><strong>Objetivo:</strong> Configurar múltiples sitios web en un solo servidor Apache con logs separados y rotación automática.</p>
-        <p><strong>Conceptos:</strong> Virtual Hosts, Apache Configuration, Log Management, Logrotate, Directory Permissions, Web Server Administration.</p>
-    </div>
-
     <section>
-        <h2>Entorno del Laboratorio</h2>
+        <h2>Entorno de Trabajo</h2>
         
         <div class="device-grid">
             <div class="device-card">
                 <h4>Sistema Operativo</h4>
-                <p><strong>Ubuntu Server</strong> 20.04 LTS</p>
-                <p><strong>Usuario:</strong> rockero</p>
+                <p><span class="status-badge status-success">UBUNTU SERVER</span></p>
+                <p><strong>Versión:</strong> 20.04 LTS</p>
             </div>
             
             <div class="device-card">
                 <h4>Servidor Web</h4>
-                <p><strong>Apache 2.4</strong></p>
-                <p><strong>Usuario servicio:</strong> www-data</p>
+                <p><span class="status-badge status-success">APACHE</span></p>
+                <p><strong>Versión:</strong> 2.4</p>
             </div>
             
             <div class="device-card">
-                <h4>Sitios Web</h4>
-                <p><strong>sitio1.com</strong></p>
-                <p><strong>sitio2.com</strong></p>
+                <h4>Usuario</h4>
+                <p><span class="status-badge status-success">ADMINISTRADOR</span></p>
+                <p><strong>Nombre:</strong> rockero</p>
             </div>
         </div>
         
-        <h3>Estructura de Directorios</h3>
+        <h3>Directorios de Sitios</h3>
         <table>
             <tr>
-                <th>Propósito</th>
-                <th>Ruta</th>
-                <th>Permisos</th>
-                <th>Propietario</th>
+                <th>Sitio</th>
+                <th>Directorio</th>
+                <th>Logs</th>
             </tr>
             <tr>
-                <td>Contenido sitio 1</td>
+                <td>sitio1.com</td>
                 <td>/var/www/sitio1.com</td>
-                <td>755</td>
-                <td>www-data:www-data</td>
-            </tr>
-            <tr>
-                <td>Contenido sitio 2</td>
-                <td>/var/www/sitio2.com</td>
-                <td>755</td>
-                <td>www-data:www-data</td>
-            </tr>
-            <tr>
-                <td>Logs sitio 1</td>
                 <td>/var/log/apache2/sitio1.com/</td>
-                <td>750</td>
-                <td>www-data:adm</td>
             </tr>
             <tr>
-                <td>Logs sitio 2</td>
+                <td>sitio2.com</td>
+                <td>/var/www/sitio2.com</td>
                 <td>/var/log/apache2/sitio2.com/</td>
-                <td>750</td>
-                <td>www-data:adm</td>
             </tr>
         </table>
     </section>
 
     <section>
-        <h2>Procedimiento Detallado</h2>
+        <h2>Procedimiento Implementado</h2>
         
         <div class="config-section">
             <h3>1. Instalación de Apache</h3>
-            
+            <p>Instalación y verificación del servicio Apache en el sistema.</p>
             <pre><code><span class="command">sudo apt update</span>
 <span class="command">sudo apt install apache2 -y</span>
 <span class="command">sudo systemctl enable apache2</span>
-<span class="command">sudo systemctl start apache2</span>
-<span class="command">sudo systemctl status apache2</span></code></pre>
-            
-            <div class="note">
-                <strong>Validación:</strong> Ejecutar <code>apache2ctl -S</code> para verificar la configuración de Virtual Hosts.
-            </div>
-
-            <!-- Espacio para imagen 1 -->
-            <div class="image-placeholder">
-                <p>🔍 <strong>Imagen 1:</strong> Verificación de Virtual Hosts con apache2ctl -S</p>
-                <p><em>Espacio reservado para imagen - Inserte la captura de pantalla aquí</em></p>
-            </div>
+<span class="command">sudo systemctl start apache2</span></code></pre>
         </div>
 
         <div class="config-section">
-            <h3>2. Creación de Directorios y Contenido</h3>
-            
-            <pre><code><span class="comment"># Crear directorios para los sitios web</span>
-<span class="command">sudo mkdir -p /var/www/sitio1.com</span>
+            <h3>2. Creación de Directorios y Páginas HTML</h3>
+            <p>Configuración de directorios para cada sitio web y creación de páginas HTML básicas.</p>
+            <pre><code><span class="command">sudo mkdir -p /var/www/sitio1.com</span>
 <span class="command">sudo mkdir -p /var/www/sitio2.com</span>
-
-<span class="comment"># Establecer permisos correctos</span>
-<span class="command">sudo chown -R www-data:www-data /var/www/sitio1.com /var/www/sitio2.com</span>
-
-<span class="comment"># Crear páginas HTML de prueba</span>
-<span class="command">echo "<h1>Sitio numero 1 usando virtual host</h1>" | sudo tee /var/www/sitio1.com/index.html</span>
-<span class="command">echo "<h1>Sitio 2</h1>" | sudo tee /var/www/sitio2.com/index.html</span></code></pre>
-            
-            <div class="note">
-                <strong>Validación:</strong> Usar <code>curl http://sitio1.com</code> y <code>curl http://sitio2.com</code> para verificar que cada sitio muestra contenido diferente.
-            </div>
-
-            <!-- Espacio para imagen 2 -->
-            <div class="image-placeholder">
-                <p>🔍 <strong>Imagen 2:</strong> Prueba de respuesta de sitios con curl -I</p>
-                <p><em>Espacio reservado para imagen - Inserte la captura de pantalla aquí</em></p>
-            </div>
+<span class="command">sudo chown -R www-data:www-data /var/www/sitio1.com /var/www/sitio2.com</span></code></pre>
         </div>
 
         <div class="config-section">
             <h3>3. Configuración de Virtual Hosts</h3>
-            
-            <h4>Archivo: /etc/apache2/sites-available/sitio1.com.conf</h4>
-            <pre><code><span class="command">&lt;VirtualHost *:80&gt;</span>
+            <p>Creación de archivos de configuración para cada sitio con rutas de logs separadas.</p>
+            <pre><code><span class="comment"># Archivo: /etc/apache2/sites-available/sitio1.com.conf</span>
+<span class="command">&lt;VirtualHost *:80&gt;</span>
 <span class="command">    ServerName sitio1.com</span>
 <span class="command">    DocumentRoot /var/www/sitio1.com</span>
 <span class="command">    ErrorLog /var/log/apache2/sitio1.com/error.log</span>
 <span class="command">    CustomLog /var/log/apache2/sitio1.com/access.log combined</span>
 <span class="command">&lt;/VirtualHost&gt;</span></code></pre>
-            
-            <h4>Archivo: /etc/apache2/sites-available/sitio2.com.conf</h4>
-            <pre><code><span class="command">&lt;VirtualHost *:80&gt;</span>
-<span class="command">    ServerName sitio2.com</span>
-<span class="command">    DocumentRoot /var/www/sitio2.com</span>
-<span class="command">    ErrorLog /var/log/apache2/sitio2.com/error.log</span>
-<span class="command">    CustomLog /var/log/apache2/sitio2.com/access.log combined</span>
-<span class="command">&lt;/VirtualHost&gt;</span></code></pre>
-            
-            <h4>Activación de sitios:</h4>
-            <pre><code><span class="command">sudo a2ensite sitio1.com.conf</span>
-<span class="command">sudo a2ensite sitio2.com.conf</span>
-<span class="command">sudo systemctl reload apache2</span></code></pre>
-
-            <!-- Espacio para imagen 3 -->
-            <div class="image-placeholder">
-                <p>🔍 <strong>Imagen 3:</strong> Generación de tráfico con curl</p>
-                <p><em>Espacio reservado para imagen - Inserte la captura de pantalla aquí</em></p>
-            </div>
         </div>
 
         <div class="config-section">
             <h3>4. Configuración de Logs Separados</h3>
-            
-            <pre><code><span class="comment"># Crear directorios para logs separados</span>
-<span class="command">sudo mkdir -p /var/log/apache2/sitio1.com</span>
+            <p>Creación de directorios específicos para logs de cada sitio con permisos adecuados.</p>
+            <pre><code><span class="command">sudo mkdir -p /var/log/apache2/sitio1.com</span>
 <span class="command">sudo mkdir -p /var/log/apache2/sitio2.com</span>
-
-<span class="comment"># Establecer permisos correctos</span>
-<span class="command">sudo chown -R www-data:adm /var/log/apache2/sitio1.com /var/log/apache2/sitio2.com</span>
-<span class="command">sudo chmod 750 /var/log/apache2/sitio1.com /var/log/apache2/sitio2.com</span></code></pre>
-            
-            <div class="note">
-                <strong>Validación:</strong> Verificar con <code>ls -l /var/log/apache2/</code> que los directorios tienen los permisos correctos.
-            </div>
-
-            <!-- Espacio para imagen 4 -->
-            <div class="image-placeholder">
-                <p>🔍 <strong>Imagen 4:</strong> Rutas de logs configuradas en Virtual Hosts</p>
-                <p><em>Espacio reservado para imagen - Inserte la captura de pantalla aquí</em></p>
-            </div>
+<span class="command">sudo chown -R www-data:adm /var/log/apache2/sitio1.com /var/log/apache2/sitio2.com</span></code></pre>
         </div>
 
         <div class="config-section">
-            <h3>5. Configuración de Rotación de Logs con Logrotate</h3>
-            
-            <h4>Archivo: /etc/logrotate.d/sitio1.com</h4>
-            <pre><code><span class="command">/var/log/apache2/sitio1.com/*.log {</span>
+            <h3>5. Rotación de Logs con Logrotate</h3>
+            <p>Configuración de rotación automática de logs para mantener el sistema limpio y seguro.</p>
+            <pre><code><span class="comment"># Archivo: /etc/logrotate.d/sitio1.com</span>
+<span class="command">/var/log/apache2/sitio1.com/*.log {</span>
 <span class="command">    daily</span>
 <span class="command">    rotate 7</span>
 <span class="command">    missingok</span>
@@ -479,183 +372,125 @@
 <span class="command">        /usr/sbin/apache2ctl graceful > /dev/null</span>
 <span class="command">    endscript</span>
 <span class="command">}</span></code></pre>
-            
-            <h4>Archivo: /etc/logrotate.d/sitio2.com</h4>
-            <pre><code><span class="command">/var/log/apache2/sitio2.com/*.log {</span>
-<span class="command">    daily</span>
-<span class="command">    rotate 7</span>
-<span class="command">    missingok</span>
-<span class="command">    notifempty</span>
-<span class="command">    compress</span>
-<span class="command">    delaycompress</span>
-<span class="command">    create 640 www-data adm</span>
-<span class="command">    sharedscripts</span>
-<span class="command">    postrotate</span>
-<span class="command">        /usr/sbin/apache2ctl graceful > /dev/null</span>
-<span class="command">    endscript</span>
-<span class="command">}</span></code></pre>
-            
-            <h4>Prueba de configuración:</h4>
-            <pre><code><span class="command">sudo logrotate -d /etc/logrotate.d/sitio1.com</span>
-<span class="command">sudo logrotate -d /etc/logrotate.d/sitio2.com</span></code></pre>
+        </div>
+    </section>
 
-            <!-- Espacio para imagen 5 -->
-            <div class="image-placeholder">
-                <p>🔍 <strong>Imagen 5:</strong> Contenido de los logs generados</p>
-                <p><em>Espacio reservado para imagen - Inserte la captura de pantalla aquí</em></p>
+    <section>
+        <h2>Verificación y Resultados</h2>
+        
+        <div class="evidence-grid">
+            <div class="evidence-card">
+                <h4>Verificación de Virtual Hosts</h4>
+                <div style="background-color: #eee; padding: 20px; text-align: center; border-radius: 5px;">
+                    <img src="img/ccnp1/apache1.jpg.bmp" alt="Verificación de Virtual Hosts">
+                </div>
+                <p class="caption">Figura 1: Comando apache2ctl -S mostrando Virtual Hosts configurados</p>
+            </div>
+            
+            <div class="evidence-card">
+                <h4>Prueba de Sitios Web</h4>
+                <div style="background-color: #eee; padding: 20px; text-align: center; border-radius: 5px;">
+                    <img src="img/ccnp1/apache2.bmp" alt="Prueba de sitios web con curl">
+                </div>
+                <p class="caption">Figura 2: Comandos curl verificando respuesta de cada sitio</p>
+            </div>
+            
+            <div class="evidence-card">
+                <h4>Generación de Logs</h4>
+                <div style="background-color: #eee; padding: 20px; text-align: center; border-radius: 5px;">
+                    <img src="img/ccnp1/apache3.bmp" alt="Generación de tráfico para logs">
+                </div>
+                <p class="caption">Figura 3: Comandos curl generando tráfico para logs</p>
+            </div>
+            
+            <div class="evidence-card">
+                <h4>Verificación de Rutas de Logs</h4>
+                <div style="background-color: #eee; padding: 20px; text-align: center; border-radius: 5px;">
+                    <img src="img/ccnp1/apache4.bmp" alt="Verificación de rutas de logs">
+                </div>
+                <p class="caption">Figura 4: Comandos grep mostrando rutas de logs configuradas</p>
+            </div>
+            
+            <div class="evidence-card">
+                <h4>Contenido de Logs</h4>
+                <div style="background-color: #eee; padding: 20px; text-align: center; border-radius: 5px;">
+                    <img src="img/ccnp1/apache5.bmp" alt="Contenido de logs separados">
+                </div>
+                <p class="caption">Figura 5: Comando tail mostrando contenido de logs separados</p>
+            </div>
+            
+            <div class="evidence-card">
+                <h4>Permisos de Directorios de Logs</h4>
+                <div style="background-color: #eee; padding: 20px; text-align: center; border-radius: 5px;">
+                    <img src="img/ccnp1/apache6.bmp" alt="Permisos de directorios de logs">
+                </div>
+                <p class="caption">Figura 6: Comando ls -l mostrando permisos correctos en directorios de logs</p>
             </div>
         </div>
     </section>
 
     <section>
-        <h2>Verificación y Pruebas</h2>
-        
-        <div class="config-section">
-            <h3>1. Verificar Virtual Hosts</h3>
-            <pre><code><span class="command">sudo apache2ctl -S</span></code></pre>
-            <div class="note">
-                <strong>Salida esperada:</strong> VirtualHosts listados para sitio1.com y sitio2.com, servidor corriendo bajo usuario www-data.
-            </div>
-        </div>
-        
-        <div class="config-section">
-            <h3>2. Probar respuesta de sitios</h3>
-            <pre><code><span class="command">curl -I http://sitio1.com</span>
-<span class="command">curl -I http://sitio2.com</span></code></pre>
-        </div>
-        
-        <div class="config-section">
-            <h3>3. Generar tráfico y verificar logs</h3>
-            <pre><code><span class="command">curl http://sitio1.com</span>
-<span class="command">curl http://sitio2.com</span>
-
-<span class="comment"># Verificar logs de acceso</span>
-<span class="command">tail -n 20 /var/log/apache2/sitio1.com/access.log</span>
-<span class="command">tail -n 20 /var/log/apache2/sitio2.com/access.log</span>
-
-<span class="comment"># Verificar logs de error</span>
-<span class="command">tail -n 20 /var/log/apache2/sitio1.com/error.log</span>
-<span class="command">tail -n 20 /var/log/apache2/sitio2.com/error.log</span></code></pre>
-
-            <!-- Espacio para imagen 6 -->
-            <div class="image-placeholder">
-                <p>🔍 <strong>Imagen 6:</strong> Permisos de escritura en logs</p>
-                <p><em>Espacio reservado para imagen - Inserte la captura de pantalla aquí</em></p>
-            </div>
-        </div>
-        
-        <div class="config-section">
-            <h3>4. Verificar rutas de logs configuradas</h3>
-            <pre><code><span class="command">grep -R "CustomLog" /etc/apache2/sites-available/</span>
-<span class="command">grep -R "ErrorLog" /etc/apache2/sites-available/</span></code></pre>
-        </div>
-        
-        <div class="config-section">
-            <h3>5. Confirmar permisos de logs</h3>
-            <pre><code><span class="command">ls -l /var/log/apache2/</span></code></pre>
-        </div>
-
-        <div class="config-section">
-            <h3>6. Probar rotación manual</h3>
-            <pre><code><span class="command">sudo logrotate -d /etc/logrotate.d/sitio1.com</span>
-<span class="command">sudo logrotate -d /etc/logrotate.d/sitio2.com</span></code></pre>
-
-            <!-- Espacio para imagen 7 -->
-            <div class="image-placeholder">
-                <p>🔍 <strong>Imagen 7:</strong> Prueba de rotación de logs en modo debug</p>
-                <p><em>Espacio reservado para imagen - Inserte la captura de pantalla aquí</em></p>
-            </div>
-        </div>
-    </section>
-
-    <section>
-        <h2>Buenas Prácticas Implementadas</h2>
+        <h2>Resumen de Configuración Implementada</h2>
         
         <div class="device-grid">
             <div class="device-card">
-                <h4>🔒 Seguridad</h4>
-                <p>Logs separados por sitio con permisos restringidos (www-data:adm, 750/640)</p>
+                <h4>Servidor Apache</h4>
+                <p><span class="status-badge status-success">ACTIVO</span></p>
+                <p><strong>Estado:</strong> Running</p>
+                <p><strong>Virtual Hosts:</strong> 2 configurados</p>
             </div>
             
             <div class="device-card">
-                <h4>📊 Gestión de Logs</h4>
-                <p>Rotación automática diaria con retención de 7 días y compresión</p>
+                <h4>Sitios Web</h4>
+                <p><span class="status-badge status-success">FUNCIONANDO</span></p>
+                <p><strong>Sitio1.com:</strong> Respondiendo</p>
+                <p><strong>Sitio2.com:</strong> Respondiendo</p>
             </div>
             
             <div class="device-card">
-                <h4>🌐 Virtual Hosts</h4>
-                <p>Configuración correcta con ServerName y DocumentRoot específicos</p>
+                <h4>Logs Separados</h4>
+                <p><span class="status-badge status-success">IMPLEMENTADOS</span></p>
+                <p><strong>Directorios:</strong> Creados</p>
+                <p><strong>Permisos:</strong> Configurados</p>
             </div>
             
             <div class="device-card">
-                <h4>✅ Validación</h4>
-                <p>Comprobaciones exhaustivas con curl y verificación de logs</p>
+                <h4>Rotación de Logs</h4>
+                <p><span class="status-badge status-success">CONFIGURADA</span></p>
+                <p><strong>Frecuencia:</strong> Diaria</p>
+                <p><strong>Retención:</strong> 7 días</p>
             </div>
         </div>
-        
-        <h3>Configuración de Logrotate Explicada</h3>
-        <table>
-            <tr>
-                <th>Directiva</th>
-                <th>Función</th>
-                <th>Beneficio</th>
-            </tr>
-            <tr>
-                <td>daily</td>
-                <td>Rotación diaria de logs</td>
-                <td>Evita archivos de log demasiado grandes</td>
-            </tr>
-            <tr>
-                <td>rotate 7</td>
-                <td>Conserva 7 archivos rotados</td>
-                <td>Balance entre historial y uso de disco</td>
-            </tr>
-            <tr>
-                <td>compress</td>
-                <td>Comprime logs rotados</td>
-                <td>Reduce uso de espacio en disco</td>
-            </tr>
-            <tr>
-                <td>create 640 www-data adm</td>
-                <td>Recrea archivos con permisos específicos</td>
-                <td>Mantiene seguridad y permisos consistentes</td>
-            </tr>
-            <tr>
-                <td>postrotate</td>
-                <td>Reinicio graceful de Apache</td>
-                <td>Apache reconoce nuevos archivos de log sin interrupción</td>
-            </tr>
-        </table>
     </section>
 
     <section>
-        <h2>Resolución de Problemas Comunes</h2>
+        <h2>Buenas Prácticas Aplicadas</h2>
         
         <table>
             <tr>
-                <th>Problema</th>
-                <th>Causa Probable</th>
-                <th>Solución</th>
+                <th>Práctica</th>
+                <th>Implementación</th>
+                <th>Beneficio</th>
             </tr>
             <tr>
-                <td>Error 403 Forbidden</td>
-                <td>Permisos incorrectos en DocumentRoot</td>
-                <td><code>sudo chown -R www-data:www-data /var/www/sitioX.com</code></td>
+                <td>Logs Separados</td>
+                <td>Directorio y archivos independientes por sitio</td>
+                <td>Facilita monitoreo y resolución de problemas</td>
             </tr>
             <tr>
-                <td>Logs no se generan</td>
-                <td>Directorio de logs sin permisos de escritura</td>
-                <td><code>sudo chown www-data:adm /var/log/apache2/sitioX.com</code></td>
+                <td>Rotación Automática</td>
+                <td>Configuración con logrotate</td>
+                <td>Evita saturación de disco y mejora rendimiento</td>
             </tr>
             <tr>
-                <td>Virtual Host no funciona</td>
-                <td>ServerName incorrecto o no habilitado</td>
-                <td><code>sudo a2ensite sitioX.com.conf</code><br><code>sudo systemctl reload apache2</code></td>
+                <td>Permisos Restringidos</td>
+                <td>Propiedad www-data:adm con permisos 750/640</td>
+                <td>Mejora la seguridad del sistema</td>
             </tr>
             <tr>
-                <td>Rotación no funciona</td>
-                <td>Configuración incorrecta en logrotate</td>
-                <td><code>sudo logrotate -d /etc/logrotate.d/sitioX.com</code></td>
+                <td>Virtual Hosts</td>
+                <td>Configuración con ServerName específico</td>
+                <td>Permite hosting múltiple en un solo servidor</td>
             </tr>
         </table>
     </section>
@@ -665,48 +500,39 @@
         
         <div class="device-grid">
             <div class="device-card">
-                <h4>✅ Apache Configurado</h4>
-                <p>Servidor web funcionando con múltiples Virtual Hosts</p>
+                <h4>✅ Servidor Apache</h4>
+                <p>Configurado exitosamente con dos sitios web funcionando</p>
+            </div>
+            
+            <div class="device-card">
+                <h4>✅ Virtual Hosts</h4>
+                <p>Implementados correctamente con ServerName específico</p>
             </div>
             
             <div class="device-card">
                 <h4>✅ Logs Separados</h4>
-                <p>Cada sitio con sus propios archivos de log de acceso y error</p>
+                <p>Configurados con directorios y permisos adecuados</p>
             </div>
             
             <div class="device-card">
                 <h4>✅ Rotación Automática</h4>
-                <p>Logrotate configurado para gestión automática de logs</p>
-            </div>
-            
-            <div class="device-card">
-                <h4>✅ Permisos Correctos</h4>
-                <p>Estructura de permisos segura y apropiada</p>
+                <p>Implementada para mantener el sistema limpio y seguro</p>
             </div>
         </div>
         
         <div class="note">
             <strong>Logros del laboratorio:</strong><br>
-            1. Servidor Apache configurado con Virtual Hosts funcionales<br>
-            2. Sistema de logs separado y organizado por sitio web<br>
-            3. Rotación automática de logs implementada<br>
-            4. Permisos y propiedad de archivos configurados correctamente<br>
-            5. Validación completa del funcionamiento del sistema
+            1. Servidor web Apache configurado con hosting múltiple<br>
+            2. Sistema de logging profesional con separación por sitio<br>
+            3. Mecanismo de rotación automática implementado<br>
+            4. Configuración de seguridad con permisos adecuados<br>
+            5. Documentación completa del proceso implementado
         </div>
-        
-        <h3>Próximos Pasos Recomendados</h3>
-        <ul>
-            <li>Configurar SSL/TLS con certificados para HTTPS</li>
-            <li>Implementar autenticación básica para áreas restringidas</li>
-            <li>Configurar monitoreo de logs con herramientas como Logwatch</li>
-            <li>Implementar balanceo de carga para alta disponibilidad</li>
-            <li>Configurar caching con Varnish o similar</li>
-        </ul>
     </section>
 
     <footer>
         <p>Documentación de Laboratorio Servidor Web Apache</p>
-        <p>© 2025 - Laboratorio de Servicios Web</p>
+        <p>© 2025 - Laboratorio de Servicios de Red</p>
     </footer>
 </body>
 </html>
