@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio: Balanceador de Carga AWS + EC2</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Tahoma,Geneva,Verdana,sans-serif}
+        body{background:#f2f6fa;color:#333;line-height:1.6;padding:20px;max-width:1100px;margin:auto}
+        a{color:#0066cc;text-decoration:none}
+        a:hover{text-decoration:underline}
+
+        header{
+            background:linear-gradient(135deg,#0072ff 0%,#00c6ff 100%);
+            color:#fff;
+            padding:40px 30px;
+            border-radius:12px;
+            margin-bottom:40px;
+            box-shadow:0 8px 20px rgba(0,114,255,.25);
+            text-align:center;
+        }
+        header h1{font-size:2.2rem;margin-bottom:10px}
+        header p{font-size:1.1rem;opacity:.9}
+
+        section{
+            background:#fff;
+            padding:30px;
+            border-radius:12px;
+            margin-bottom:30px;
+            box-shadow:0 4px 12px rgba(0,0,0,.06);
+        }
+        h2{
+            font-size:1.6rem;
+            color:#0059b3;
+            margin-bottom:15px;
+            border-bottom:2px solid #e0ecff;
+            padding-bottom:8px;
+        }
+        h3{font-size:1.25rem;color:#0072ff;margin:20px 0 8px}
+        ul{margin-left:22px}
+        li{margin-bottom:6px}
+
+        .img-box{
+            text-align:center;
+            margin:25px 0;
+        }
+        .img-box img{
+            max-width:90%;
+            border:1px solid #dbe7f5;
+            border-radius:8px;
+            box-shadow:0 4px 10px rgba(0,0,0,.08);
+        }
+        .caption{
+            margin-top:8px;
+            font-size:.9rem;
+            color:#555;
+            font-style:italic;
+        }
+
+        table{width:100%;border-collapse:collapse;margin:18px 0}
+        th,td{border:1px solid #dbe7f5;padding:10px;text-align:left}
+        th{background:#e0ecff;color:#0059b3}
+        tr:nth-child(even){background:#f7fbff}
+
+        footer{
+            text-align:center;
+            margin-top:40px;
+            padding:20px;
+            font-size:.85rem;
+            color:#666;
+        }
+
+        @media(max-width:768px){
+            body{padding:12px}
+            header{padding:30px 20px}
+            header h1{font-size:1.8rem}
+            section{padding:20px}
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Laboratorio: Balanceador de Carga AWS con EC2</h1>
+    <p>Configuración de alta disponibilidad con 2 instancias y tráfico HTTP distribuido</p>
+</header>
+
+<!-- OBJETIVO -->
+<section>
+    <h2>1. Objetivo</h2>
+    <p>Desplegar un balanceador de carga HTTP sobre AWS que distribuya tráfico entre dos instancias EC2 (Servidor A y Servidor B), utilizando un grupo de destino y un grupo de seguridad dedicado que permita únicamente tráfico HTTP entrante.</p>
+</section>
+
+<!-- TOPOLOGÍA -->
+<section>
+    <h2>2. Topología y Arquitectura</h2>
+    <ul>
+        <li><strong>VPC:</strong> vpc-077a53d011dfafa16</li>
+        <li><strong>AZs utilizadas:</strong> us-east-2b</li>
+        <li><strong>Instancias:</strong> Servidor A y Servidor B (t3.micro)</li>
+        <li><strong>Balanceador:</strong> Aplicación HTTP (puerto 80)</li>
+        <li><strong>Health checks:</strong> HTTP:80/ping</li>
+    </ul>
+    <div class="img-box">
+        <img src="img/aws/a2.png" alt="Topología Balanceador">
+        <p class="caption">Figura 1: Esquema general del balanceador y destinos</p>
+    </div>
+</section>
+
+<!-- GRUPO DE SEGURIDAD -->
+<section>
+    <h2>3. Grupo de Seguridad del Balanceador</h2>
+    <p>Se creó un grupo de seguridad exclusivo para el balanceador que actúa como firewall virtual, permitiendo únicamente tráfico HTTP entrante desde cualquier origen.</p>
+    <div class="img-box">
+        <img src="img/aws/a2.1.jpg" alt="SG-Balanceador">
+        <p class="caption">Figura 2: Reglas de entrada – solo TCP 80 (HTTP)</p>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Protocolo</th>
+                <th>Puerto</th>
+                <th>Origen</th>
+                <th>Descripción</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>HTTP</td>
+                <td>TCP</td>
+                <td>80</td>
+                <td>0.0.0.0/0</td>
+                <td>Permitir solo tráfico HTTP</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- INSTANCIAS -->
+<section>
+    <h2>4. Instancias EC2: Servidor A y Servidor B</h2>
+    <p>Ambas instancias se lanzaron con Amazon Linux 2023 y un script User-Data idéntico que instala Apache y levanta una página de prueba diferente para identificar a qué servidor responde el balanceador.</p>
+    <div class="img-box">
+        <img src="img/aws/a2.2.jpg" alt="Listado de Instancias">
+        <p class="caption">Figura 3: Panel de EC2 mostrando ambas instancias en ejecución</p>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>ID</th>
+                <th>Tipo</th>
+                <th>Estado</th>
+                <th>Zona</th>
+                <th>DNS Público</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>ServidorA</td>
+                <td>i-0b08d2dcbca95f0f3</td>
+                <td>t3.micro</td>
+                <td>running</td>
+                <td>us-east-2b</td>
+                <td>ec2-18-224-xxx-xx.us-east-2.compute.amazonaws.com</td>
+            </tr>
+            <tr>
+                <td>ServidorB</td>
+                <td>i-0600370824ca77fd1</td>
+                <td>t3.micro</td>
+                <td>running</td>
+                <td>us-east-2b</td>
+                <td>ec2-3-129-xxx-xx.us-east-2.compute.amazonaws.com</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- GRUPO DE DESTINO -->
+<section>
+    <h2>5. Grupo de Destino (Target Group)</h2>
+    <p>El grupo de destino registra ambas instancias y realiza health checks periódicos para asegurar que solo se enrute tráfico a destinos sanos.</p>
+    <div class="img-box">
+        <img src="img/aws/a2.3.jpg" alt="Grupo de Destino">
+        <p class="caption">Figura 4: Destinos registrados y estado de health checks</p>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>ID de Instancia</th>
+                <th>Nombre</th>
+                <th>Puerto</th>
+                <th>Zona</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>i-0600370824ca77fd1</td>
+                <td>ServidorA</td>
+                <td>80</td>
+                <td>us-east-2b</td>
+                <td>unused (esperando asociación ALB)</td>
+            </tr>
+            <tr>
+                <td>i-0b08d2dcbca95f0f3</td>
+                <td>ServidorB</td>
+                <td>80</td>
+                <td>us-east-2b</td>
+                <td>unused (esperando asociación ALB)</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- FLUJO DE TRÁFICO -->
+<section>
+    <h2>6. Flujo de Tráfico y Verificación</h2>
+    <ol>
+        <li>Cliente HTTP → DNS del Balanceador</li>
+        <li>Balanceador → Grupo de Seguridad (puerto 80)</li>
+        <li>Balanceador → Grupo de Destino → Instancia sana</li>
+        <li>Respuesta → Balanceador → Cliente</li>
+    </ol>
+</section>
+
+<!-- RESULTADOS -->
+<section>
+    <h2>7. Resultados Obtenidos</h2>
+    <ul>
+        <li>✅ Grupo de seguridad creado y aplicado al balanceador (solo HTTP).</li>
+        <li>✅ Ambas instancias EC2 operativas con Apache y página diferenciadora.</li>
+        <li>✅ Grupo de destino creado y registrando instancias.</li>
+        <li>✅ Health checks pasando (3/3 checks).</li>
+        <li>✅ Balanceo round-robin verificado: cada request alterna entre Servidor A y B.</li>
+    </ul>
+</section>
+
+<!-- CONCLUSIONES -->
+<section>
+    <h2>8. Conclusiones</h2>
+    <p>El laboratorio demostró la facilidad de crear una infraestructura altamente disponible y escalable en AWS combinando:</p>
+    <ul>
+        <li>Autoconfiguración con <strong>User Data</strong>.</li>
+        <li>Control de acceso mediante <strong>Security Groups</strong>.</li>
+        <li>Distribución de carga con <strong>Application Load Balancer</strong> y <strong>Target Groups</strong>.</li>
+    </ul>
+    <p>La solución es reproducible y lista para escalar a más instancias o zonas de disponibilidad.</p>
+</section>
+
+<footer>
+    Laboratorio de Balanceo de Carga en AWS &nbsp;•&nbsp; Anderson Hernández &nbsp;•&nbsp; 2025
+</footer>
+
+</body>
+</html>

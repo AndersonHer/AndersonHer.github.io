@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio: Lanzar EC2 + Apache con User-Data</title>
+    <style>
+        /* ---------- RESET & BASE ---------- */
+        *{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Tahoma,Geneva,Verdana,sans-serif}
+        body{
+            background:#f2f6fa;
+            color:#333;
+            line-height:1.6;
+            padding:20px;
+            max-width:1100px;
+            margin:auto;
+        }
+        a{color:#0066cc;text-decoration:none}
+        a:hover{text-decoration:underline}
+
+        /* ---------- HEADER ---------- */
+        header{
+            background:linear-gradient(135deg,#0072ff 0%,#00c6ff 100%);
+            color:#fff;
+            padding:40px 30px;
+            border-radius:12px;
+            margin-bottom:40px;
+            box-shadow:0 8px 20px rgba(0,114,255,.25);
+            text-align:center;
+        }
+        header h1{font-size:2.2rem;margin-bottom:10px}
+        header p{font-size:1.1rem;opacity:.9}
+
+        /* ---------- SECTIONS ---------- */
+        section{
+            background:#fff;
+            padding:30px;
+            border-radius:12px;
+            margin-bottom:30px;
+            box-shadow:0 4px 12px rgba(0,0,0,.06);
+        }
+        h2{
+            font-size:1.6rem;
+            color:#0059b3;
+            margin-bottom:15px;
+            border-bottom:2px solid #e0ecff;
+            padding-bottom:8px;
+        }
+        h3{font-size:1.25rem;color:#0072ff;margin:20px 0 8px}
+        ul{margin-left:22px}
+        li{margin-bottom:6px}
+
+        /* ---------- CODE ---------- */
+        pre{
+            background:#002b36;
+            color:#839496;
+            padding:18px;
+            border-radius:8px;
+            overflow-x:auto;
+            font-size:.95rem;
+            line-height:1.45;
+            margin:15px 0;
+        }
+        code{font-family:"Consolas","Courier New",monospace}
+        .comment{color:#586e75;font-style:italic}
+        .command{color:#b58900}
+
+        /* ---------- IMAGES ---------- */
+        .img-box{
+            text-align:center;
+            margin:25px 0;
+        }
+        .img-box img{
+            max-width:90%;
+            border:1px solid #dbe7f5;
+            border-radius:8px;
+            box-shadow:0 4px 10px rgba(0,0,0,.08);
+        }
+        .caption{
+            margin-top:8px;
+            font-size:.9rem;
+            color:#555;
+            font-style:italic;
+        }
+
+        /* ---------- TABLE ---------- */
+        table{width:100%;border-collapse:collapse;margin:18px 0}
+        th,td{border:1px solid #dbe7f5;padding:10px;text-align:left}
+        th{background:#e0ecff;color:#0059b3}
+        tr:nth-child(even){background:#f7fbff}
+
+        /* ---------- FOOTER ---------- */
+        footer{
+            text-align:center;
+            margin-top:40px;
+            padding:20px;
+            font-size:.85rem;
+            color:#666;
+        }
+
+        /* ---------- RESPONSIVE ---------- */
+        @media(max-width:768px){
+            body{padding:12px}
+            header{padding:30px 20px}
+            header h1{font-size:1.8rem}
+            section{padding:20px}
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Laboratorio: Despliegue de Servidor Web en AWS EC2</h1>
+    <p>Automatización con <strong>User Data</strong> – Apache + Página de prueba</p>
+</header>
+
+<!-- OBJETIVO -->
+<section>
+    <h2>1. Objetivo</h2>
+    <p>Lanzar una instancia EC2 con una configuración inicial automatizada que instale y levante un servidor web Apache mostrando una página personalizada, sin intervención manual tras el arranque.</p>
+</section>
+
+<!-- TOPOLOGÍA / ARQUITECTURA -->
+<section>
+    <h2>2. Arquitectura y Recursos</h2>
+    <ul>
+        <li><strong>Región:</strong> us-east-2 (Ohio)</li>
+        <li><strong>AMI:</strong> Amazon Linux 2023 (ami-0199d4b5b8b4fde0e)</li>
+        <li><strong>Tipo:</strong> t3.micro (gratuito)</li>
+        <li><strong>Almacenamiento:</strong> 8 GiB (EBS)</li>
+        <li><strong>Seguridad:</strong> Nuevo grupo de seguridad (puerto 80 abierto)</li>
+        <li><strong>Conectividad:</strong> IP pública + DNS automático</li>
+    </ul>
+</section>
+
+<!-- USER DATA -->
+<section>
+    <h2>3. Script User Data (bash)</h2>
+    <pre><code><span class="comment">#!/bin/bash</span>
+<span class="comment"># Actualizar repositorios e instalar Apache + PHP</span>
+yum update -y
+yum install -y httpd php php-mysqlnd
+
+<span class="comment"># Levantar y habilitar Apache</span>
+systemctl start httpd
+systemctl enable httpd
+
+<span class="comment"># Crear página de prueba</span>
+echo '&lt;h1&gt;¡Servidor Web funcionando en EC2 por Anderson Hernández!&lt;/h1&gt;' &gt; /var/www/html/index.php</code></pre>
+</section>
+
+<!-- PASOS EJECUTADOS -->
+<section>
+    <h2>4. Pasos Ejecutados</h2>
+    <ol>
+        <li>Acceder al servicio <strong>EC2 → Lanzar instancia</strong>.</li>
+        <li>Seleccionar AMI <em>Amazon Linux 2023</em>.</li>
+        <li>Elegir tipo <em>t3.micro</em> y crear nuevo par de claves ( formato .pem ).</li>
+        <li>En <em>“Configuración de red”</em> crear un nuevo grupo de seguridad con:
+            <ul>
+                <li>SSH (22)  → 0.0.0.0/0</li>
+                <li>HTTP (80) → 0.0.0.0/0</li>
+            </ul>
+        </li>
+        <li>Expandir <em>“Datos de usuario”</em> y pegar el script anterior.</li>
+        <li>Lanzar la instancia y esperar el cambio de estado a <em>“En ejecución”</em>.</li>
+    </ol>
+</section>
+
+<!-- RESULTADO -->
+<section>
+    <h2>5. Resultado</h2>
+    <ul>
+        <li><strong>ID de instancia:</strong> <code>i-0c2b878f889b3cdc8</code></li>
+        <li><strong>DNS público:</strong> <code>ec2-3-145-211-208.us-east-2.compute.amazonaws.com</code></li>
+        <li><strong>Página servida:</strong><br>
+            <a href="http://ec2-3-145-211-208.us-east-2.compute.amazonaws.com" target="_blank">
+                http://ec2-3-145-211-208.us-east-2.compute.amazonaws.com
+            </a>
+        </li>
+    </ul>
+    <div class="img-box">
+        <img src="img/aws/A1.jpg" alt="Página web en EC2">
+        <p class="caption">Figura 1: Página de prueba desplegada exitosamente</p>
+    </div>
+</section>
+
+<!-- VERIFICACIÓN -->
+<section>
+    <h2>6. Verificación Rápida</h2>
+    <pre><code><span class="comment"># Desde la instancia (EC2 Instance Connect o SSH)</span>
+<span class="command">$ systemctl status httpd</span>   <span class="comment"># active (running)</span>
+<span class="command">$ curl localhost</span>           <span class="comment"># &lt;h1&gt;¡Servidor Web funcionando en EC2 por Anderson Hernández!&lt;/h1&gt;</span></code></pre>
+</section>
+
+<!-- CONCLUSIONES -->
+<section>
+    <h2>7. Conclusiones</h2>
+    <ul>
+        <li>✅ La configuración inicial se automatizó completamente con <em>User Data</em>.</li>
+        <li>✅ El servidor Apache quedó operativo en menos de 2 min tras el lanzamiento.</li>
+        <li>✅ Se redujo al mínimo la intervención manual y los posibles errores de tipeo.</li>
+        <li>✅ El método es reproducible y escalable para despliegues futuros.</li>
+    </ul>
+</section>
+
+<footer>
+    Laboratorio de Automatización en AWS &nbsp;•&nbsp; Anderson Hernández &nbsp;•&nbsp; 2025
+</footer>
+
+</body>
+</html>
